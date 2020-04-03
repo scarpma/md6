@@ -1,2 +1,4 @@
 data/*
 exec/*
+*.ipynb
+.DS_Store
