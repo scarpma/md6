@@ -74,6 +74,7 @@ void load_r(vec *r) {
 	fscanf(inputr,"%i\n\n",&garb);
 	for (int i = 0; i < npart; i++) {
 		fscanf(inputr,"atomX %g %g %g\n", &(r[i].x), &(r[i].y), &(r[i].z));
+        //printf("%g %g %g",r[i].x,r[i].y,r[i].z);
 	}
 	fclose(inputr);
 }

@@ -53,6 +53,11 @@ int main() {
 	write_r(output, r);
 	printf("Inizio ad integrare:\n\n");
 	fprintf(logfile, "Inizio ad integrare: attendi!\n\n");
+    for (int i; i < npart; i++) {
+        a[i].x = 0.0;
+        a[i].y = 0.0;
+        a[i].z = 0.0;
+    }
 	compute_forces(r, a);
 	eulero(r, ro, a);
 	write_r(output, r);
@@ -67,11 +72,12 @@ int main() {
 	}
 	if (out_count > 0) printf("Le condizioni iniziali non sono all'interno del box periodico.\n");
 
+
 	// INTEGRO CON VERLET
 	t = 2;
 	for (int tt = 2; tt < (timesteps-1) / write_jump; tt++) {
-		for (int k = 0; k < write_jump - 1; k++) {
-			compute_forces(r, a); 
+		for (int k = 0; k < write_jump; k++) {
+			compute_forces(r, a);
 			verlet_periodic(r, ro, a);
 			t++;
 		}
@@ -82,9 +88,9 @@ int main() {
 	
 	// ULTIMA INTEGRAZIONE
 	output_in_cond = fopen("./data/in_cond.xyz","w");
-	output_in_cond_vel = fopen("./data/in_cond_vel.dat","w");
+    output_in_cond_vel = fopen("./data/in_cond_vel.dat","w");
 	compute_forces_stat(r, a);
-	verlet_periodic_last(r, ro, a); t++;
+    verlet_periodic_last(r, ro, a); t++;
 	write_durata_totale();
 	
 	// CHIUDO FILES
