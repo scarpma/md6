@@ -2,4 +2,4 @@
 
 ./exec/corr_func
 python3 ./graph/corr_func.py
-open ./data/corr_func.pdf
+open ./salvati/corr_func.pdf

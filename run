@@ -1,8 +1,8 @@
 #!/bin/bash
 
 STARTTIME=$(date +%s)
-./exec/main;
-./exec/autodiffusion;
+./exec/main &&
+./exec/autodiffusion &&
 python3 graph/stat.py;
 python3 graph/autodiffusion.py;
 #gnuplot graph/autodiffusion.gnu;

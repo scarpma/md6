@@ -49,8 +49,8 @@ int main() {
 	// INIZIALIZZO FILE OUTPUT
 	fprintf(output, "#    x(1)      f(x)(2)\n");
 
+    // CARICO r
 	for (int k = 0; k < ntime; k++) {
-		// CARICO r E rin
 		load_r_2(inputr, r);
 		
 		// CICLO SU OGNI PARTICELLA PRIMARIA j
@@ -71,7 +71,7 @@ int main() {
 	}
 	for (int a = 0; a < n_bin; a++) {
 		fv[a] /= (npart*ntime);
-		fprintf(output, "%g %g\n",xv[a],fv[a]);
+		fprintf(output, "%g %g %g\n",xv[a],fv[a],pow(xv[a],2.)*4.*3.1415*dx);
 	}
 	fclose(output);
 }
