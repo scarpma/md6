@@ -1,4 +1,5 @@
 ## Molecular Dynamics program implemented in plain C
+[![CodeFactor](https://www.codefactor.io/repository/github/scarpma/md6/badge)](https://www.codefactor.io/repository/github/scarpma/md6)
 
 The program was developed for master degree (in Physics) exam "Fisica dei Fluidi Complessi e Turbolenza".
 
