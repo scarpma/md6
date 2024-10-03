@@ -12,6 +12,28 @@ typedef struct {
   float x,y,z;
 } vec;
 
+void load_r(char *filename, vec *r, int npart) {
+  FILE *inputr;
+  inputr = fopen(filename,"r");
+  int garb;
+  fscanf(inputr,"%i\n\n",&garb);
+  for (int i = 0; i < npart; i++) {
+    fscanf(inputr,"atomX %g %g %g\n", &(r[i].x), &(r[i].y), &(r[i].z));
+  }
+  fclose(inputr);
+}
+
+void write_r(char *filename, vec *r, int npart) {
+  FILE *fp;
+  fp = fopen(filename, "w");
+  fprintf(fp, "%i\n\n", npart);
+  for (int i=0; i<npart; i++) {
+    fprintf(fp, "atomX %g %g %g\n", r[i].x, r[i].y, r[i].z);
+    //printf("atomX %g %g %g\n", r[i].x, r[i].y, r[i].z);
+  }
+  fclose(fp);
+}
+
 float GaussianNoise(float mu, float var){
   double u1, u2;
   u1 = rand() * (1.0 / RAND_MAX);
@@ -140,6 +162,17 @@ int main() {
   a  = malloc(npart*sizeof(vec));
 
   fcc(nlayers, npartx, nparty, a_lattice, npart, mu, var);
+  load_r("./data/in_cond.xyz", r, npart);
+  char filename[64];  // Make sure the array is large enough to hold the result
+
+  for (int i=0; i<10; i++) {
+    for (int j=0; j<npart; j++) {
+      r[j].x += a_lattice;
+      r[j].y += a_lattice;
+    }
+    sprintf(filename, "./data/r_%06d.xyz", i);
+    write_r(filename, r, npart);
+  }
 
   return 0;
 }
