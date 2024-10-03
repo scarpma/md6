@@ -38,8 +38,15 @@ int main() {
     last_durata_totale = 0.;
     logfile = fopen("./salvati/run.log", "w");
     printf("Inizio una nuova simulazione: inizializzo reticolo FCC e velocità random.\n");
-    fprintf(logfile,"Inizio una nuova simulazione:\n\nPARAM:\nnpartx=%i\nnparty=%i\nnlayers=%i\nnpart=%i\nwrite_jump=%i\ntimesteps=%i\ndt=%g\neps=%g\nsigma=%g\nmu=%g\nvar=%g\nm=%g\na_lattice=%g\npot_trunc_perc=%g\nnew_in_cond=%i\n\n\ninizializzo reticolo FCC e velocità random\n\n",npartx,nparty,nlayers,npart,write_jump,timesteps,dt,eps,sigma,mu,var,m,a_lattice,pot_trunc_perc,newc);
-    fprintf(logfile, "r_max=%g    BOXL=%g    red. dens=%g\n", r_max, BOXL, reduced_density);
+    fprintf(logfile,"Inizio una nuova simulazione:\n\nPARAM:\n");
+    fprintf(logfile,"npartx=%i\nnparty=%i\n",npartx,nparty);
+    fprintf(logfile,"nlayers=%i\nnpart=%i\n",nlayers,npart);
+    fprintf(logfile,"write_jump=%i\ntimesteps=%i\n",write_jump,timesteps);
+    fprintf(logfile,"dt=%g\neps=%g\nsigma=%g\n",dt,eps,sigma);
+    fprintf(logfile,"mu=%g\nvar=%g\nm=%g\na_lattice=%g\n",mu,var,m,a_lattice);
+    fprintf(logfile,"pot_trunc_perc=%g\nnew_in_cond=%i\n\n\n",pot_trunc_perc,newc);
+    fprintf(logfile,"inizializzo reticolo FCC e velocità random\n\n");
+    fprintf(logfile, "r_max=%g    BOXL=%g    red. dens=%g\n",r_max,BOXL,reduced_density);
     fcc();
   }
     
