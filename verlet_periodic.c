@@ -97,25 +97,25 @@ void verlet_periodic_last(vec *r, vec *ro, vec *a) {
 
 void compute_forces(vec *r, vec *a) {
   for (int i = 0; i < npart; i++) {
-      a[i].x = 0.;
-      a[i].y = 0.;
-      a[i].z = 0.;
+    a[i].x = 0.;
+    a[i].y = 0.;
+    a[i].z = 0.;
     }
   for (int i = 0; i < npart; i++) {
     for (int j = i + 1; j < npart; j++) {
       rij.x = (r[i].x - r[j].x);
       rij.y = (r[i].y - r[j].y);
       rij.z = (r[i].z - r[j].z);
-            // printf("FORCES DISTANCES %g %g %g\n",rij.x,rij.y,rij.z);
+      // printf("FORCES DISTANCES %g %g %g\n",rij.x,rij.y,rij.z);
       rij.x = rij.x - BOXL*round(rij.x/BOXL);
       rij.y = rij.y - BOXL*round(rij.y/BOXL);
       rij.z = rij.z - BOXL*round(rij.z/BOXL);
       rij2 = rij.x*rij.x + rij.y*rij.y + rij.z*rij.z;
-            // printf("FORCES DISTANCES RESCALED %g %g %g\n",rij.x,rij.y,rij.z);
-            // printf("FORCES DISTANCES RESCALED MOD %g\n",rij2);
+      // printf("FORCES DISTANCES RESCALED %g %g %g\n",rij.x,rij.y,rij.z);
+      // printf("FORCES DISTANCES RESCALED MOD %g\n",rij2);
       if (rij2 < r_max_squared) {
         simforceij = simforce(rij2, eps, sigma);
-                // printf("SIMFORCE %g\n",simforceij);
+        // printf("SIMFORCE %g\n",simforceij);
         a[i].x = a[i].x + simforceij * rij.x;
         a[i].y = a[i].y + simforceij * rij.y;
         a[i].z = a[i].z + simforceij * rij.z;
@@ -124,16 +124,16 @@ void compute_forces(vec *r, vec *a) {
         a[j].z = a[j].z - simforceij * rij.z;
       }
     }
-        // printf("FORCES %g %g %g\n",a[i].x,a[i].y,a[i].z);
+    // printf("FORCES %g %g %g\n",a[i].x,a[i].y,a[i].z);
   }
 }
 
 
 void compute_forces_stat(vec *r, vec *a) {
   for (int i = 0; i < npart; i++) {
-      a[i].x = 0.;
-      a[i].y = 0.;
-      a[i].z = 0.;
+    a[i].x = 0.;
+    a[i].y = 0.;
+    a[i].z = 0.;
     }
   for (int i = 0; i < npart; i++) { // calcolo forze
     for (int j = i + 1; j < npart; j++) {
@@ -167,7 +167,7 @@ void eulero(vec *r, vec *ro, vec *a) {
     rni.x = r[i].x + vi.x * dt + 0.5 * dtsquare * a[i].x / m;
     rni.y = r[i].y + vi.x * dt + 0.5 * dtsquare * a[i].y / m;
     rni.z = r[i].z + vi.x * dt + 0.5 * dtsquare * a[i].z / m;
-        // printf("EULERO %g %g %g\n",rni.x,rni.y,rni.z);
+    // printf("EULERO %g %g %g\n",rni.x,rni.y,rni.z);
     ro[i].x = r[i].x;
     ro[i].y = r[i].y;
     ro[i].z = r[i].z;
