@@ -95,9 +95,9 @@ int main() {
   // CONTROLLO CHE TUTTE LE PARTICELLE SIANO NEL BOX
   int out_count = 0;
   for (int i = 0; i < npart; i++) {
-    if (-BOXL/2.>r[i].x > BOXL/2.) out_count += 1;
-    if (-BOXL/2.>r[i].y > BOXL/2.) out_count += 1;
-    if (-BOXL/2.>r[i].z > BOXL/2.) out_count += 1;
+    if (r[i].x < -BOXL/2. || r[i].x > BOXL/2.) out_count += 1;
+    if (r[i].y < -BOXL/2. || r[i].y > BOXL/2.) out_count += 1;
+    if (r[i].z < -BOXL/2. || r[i].z > BOXL/2.) out_count += 1;
   }
   if (out_count > 0) printf("Le condizioni iniziali non sono all'interno del box periodico.\n");
 
