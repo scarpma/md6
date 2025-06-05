@@ -32,7 +32,9 @@ int main() {
     printf("Proseguo ultima simulazione. nrun = %d, t_in = %.2f\n",nrun,last_durata_totale);
     fprintf(logfile,"Proseguo ultima simulazione. nrun = %d, t_in = %.2f\n",nrun,last_durata_totale);
   } else if (newc == 1) {
-        int status = system("./del-data"); // esegue uno script di sistema
+    int status = system("./del-data"); // esegue uno script di sistema
+    status = system("mkdir ./salvati"); // esegue uno script di sistema
+    status = system("mkdir ./data"); // esegue uno script di sistema
     printf("r_max=%g    BOXL=%g    red. dens=%g\n",r_max,BOXL,reduced_density);
     nrun = 0;
     last_durata_totale = 0.;
