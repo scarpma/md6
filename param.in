@@ -12,4 +12,4 @@ var=1.5
 m=1.0
 a_lattice=1.5
 pot_trunc_perc=0.0005
-new_in_cond=0
+new_in_cond=1
