@@ -82,7 +82,7 @@ int main() {
   write_r(output, r);
   printf("Inizio ad integrare:\n\n");
   fprintf(logfile, "Inizio ad integrare: attendi!\n\n");
-    for (int i; i < npart; i++) {
+    for (int i = 0; i < npart; i++) {
         a[i].x = 0.0;
         a[i].y = 0.0;
         a[i].z = 0.0;
