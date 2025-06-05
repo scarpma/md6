@@ -28,7 +28,15 @@ void fcc(void) {
   float semi_lattice_len_z = nlayers*a_lattice/2.;
   
   cond_in = fopen("./data/in_cond.xyz","w");
+  if (!cond_in) {
+    perror("fopen cond_in");
+    exit(1);
+  }
   cond_in_vel = fopen("./data/in_cond_vel.dat","w");
+  if (!cond_in_vel) {
+    perror("fopen cond_in_vel");
+    exit(1);
+  }
 
   fprintf(cond_in,"%i\n\n",npart);
 
