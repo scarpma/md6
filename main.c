@@ -46,9 +46,6 @@ int main(int argc, char *argv[]) {
   reduced_density = npart * sigma / pow(BOXL, 3.);
 
   if (newc==0) {printf("Restart simulation feature not available. Stoppingi\n"); return -1;}
-  int status = system("./del-data");
-  status = system("mkdir ./salvati");
-  status = system("mkdir ./data");
   printf("r_max=%g    BOXL=%g    red. dens=%g\n",r_max,BOXL,reduced_density);
   nrun = 0;
   last_durata_totale = 0.;
