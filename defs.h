@@ -3,6 +3,9 @@
 #include <math.h>
 #include <time.h>
 
+// useful for debbugging
+#define LOG_LOCATION() printf("File: %s, Line: %d\n", __FILE__, __LINE__)
+
 struct vec3d {float x, y, z;};
 typedef struct vec3d vec;
 
