@@ -1,0 +1,15 @@
+npartx=6
+nparty=6
+nlayers=6
+npart=864
+write_jump=10
+timesteps=20000
+dt=0.0005
+eps=10.0
+sigma=1.0
+mu=0.0
+var=10.0
+m=1.0
+a_lattice=1.5
+pot_trunc_perc=0.0005
+new_in_cond=1
