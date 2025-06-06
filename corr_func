@@ -1,5 +1,0 @@
-#!/bin/bash
-
-./exec/corr_func
-python3 ./graph/corr_func.py
-open ./salvati/corr_func.pdf
