@@ -1,4 +1,6 @@
-f = open('./data/autodiffusion.dat','r')
+import sys
+run_dir = sys.argv[1]
+f = open('./'+run_dir+'/autodiffusion.dat','r')
 tv = []
 vx = []
 vy = []
@@ -21,4 +23,4 @@ ax.plot(tv,vy,label='var y')
 ax.plot(tv,vz,label='var z')
 ax.legend()
 ax.set_xlabel('t')
-fig.savefig('./data/autodiffusion.pdf')
+fig.savefig('./'+run_dir+'/autodiffusion.pdf')

@@ -1,10 +1,13 @@
 
 # coding: utf-8
 
+import sys
+run_dir = sys.argv[1]
+
 # In[12]:
 
 
-f = open('./data/stat.dat','r')
+f = open('./'+run_dir+'/stat.dat','r')
 tv = []
 px = []
 py = []
@@ -43,7 +46,7 @@ axs[0].legend()
 axs[1].legend()
 axs[0].set_xlabel('t')
 axs[1].set_xlabel('t')
-fig.savefig('./data/stat.pdf')
+fig.savefig('./'+run_dir+'/stat.pdf')
 
 
 # In[7]:

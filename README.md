@@ -47,16 +47,15 @@ new_in_cond=1
 Finally, execute the code
 
 ```bash
-> ./exec/main <run_directory> # this runs the MD simulation
-> ./exec/autodiffusion <run_directory> # this computes the autodiffusion
-> ./exec/corr_func <run_directory> # this computes the correlation function
+> ./exec/main run_tmp # this runs the MD simulation
+> ./exec/autodiffusion run_tmp # this computes the autodiffusion
+> ./exec/corr_func run_tmp # this computes the correlation function
 ```
 
 To analyze the results, use the python scripts:
 ```bash
-> python3 ./exec/main <run_directory> # this runs the MD simulation
-> python3 ./exec/autodiffusion <run_directory> # this computes the autodiffusion
-> python3 ./exec/corr_func <run_directory> # this computes the correlation function
+> python3 graph/autodiffusion.py run_tmp
+> python3 graph/stat.py run_tmp
 ```
 
 
