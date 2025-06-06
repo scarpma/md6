@@ -16,6 +16,9 @@ This repository contains the programs:
 - `autodiffusion.c`
 - `corr_func.c`
 
+The autodiffusion coefficient $D$ is defined as: 
+$$ \left\langle \left( r(t)-r(0) \right)^2 \right\rangle $$
+
 How to use:
 First, compile the programs and prepare a directory where the code will run and save its outputs
 
@@ -43,6 +46,10 @@ a_lattice=1.5
 pot_trunc_perc=0.0005
 new_in_cond=1
 ```
+
+> [!NOTE]
+>
+> `npart` should be `4*nlayers*npartx*nparty`
 
 Finally, execute the code
 
