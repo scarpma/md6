@@ -11,4 +11,7 @@ The dynamics is integrated through the "*Verlet algorithm*" and some data analys
 
 Balancing the density of particles with the periodic box dimensions is a little difficult and should be faced more seriously.
 
-
+This repository contains the programs:
+- `main.c`
+- `autodiffusion.c`
+- `corr_func.c`
