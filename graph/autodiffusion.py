@@ -1,26 +1,17 @@
 import sys
+import numpy as np
 run_dir = sys.argv[1]
-f = open('./'+run_dir+'/autodiffusion.dat','r')
-tv = []
-vx = []
-vy = []
-vz = []
-ii = 0
-for line in f:
-    line = line.split(' ')
-    if ii>0:
-        tv.append(float(line[0]))
-        vx.append(float(line[1]))
-        vy.append(float(line[2]))
-        vz.append(float(line[3]))
-    ii += 1
+filepath = open('./'+run_dir+'/autodiffusion.dat','r')
+data = np.loadtxt(filepath,skiprows=1)
 
+tv = data[:,0]
+vx = data[:,1]
+vy = data[:,2]
+vz = data[:,3]
 
 import matplotlib.pyplot as plt
 fig, ax = plt.subplots(1,1,figsize=(8,5))
-ax.plot(tv,vx,label='var x')
-ax.plot(tv,vy,label='var y')
-ax.plot(tv,vz,label='var z')
-ax.legend()
+ax.plot(tv,1./6.*(vx+vy+vz))
 ax.set_xlabel('t')
+ax.set_ylabel('1/6 var(r^2)')
 fig.savefig('./'+run_dir+'/autodiffusion.pdf')
