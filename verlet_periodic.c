@@ -59,7 +59,7 @@ void verlet_periodic_write(vec *r, vec *ro, vec *a) {
     sumv.z += vi.z;
     kenergy += vi.x*vi.x + vi.y*vi.y + vi.z*vi.z;
     }
-  write_r(output, r);
+  write_r(coordfile, r);
   write_stat();
   sumv.x = 0.0;
   sumv.y = 0.0;
@@ -87,10 +87,10 @@ void verlet_periodic_last(vec *r, vec *ro, vec *a) {
     sumv.y += vi.y;
     sumv.z += vi.z;
     kenergy += vi.x*vi.x + vi.y*vi.y + vi.z*vi.z;
-    write_vi(output_in_cond_vel);
+    write_vi(restartvelfile);
   }
-  write_r(output, r);
-  write_r(output_in_cond, r);
+  write_r(coordfile, r);
+  write_r(restartcoordfile, r);
   write_stat();
 }
 
@@ -161,7 +161,7 @@ void compute_forces_stat(vec *r, vec *a) {
 
 void eulero(vec *r, vec *ro, vec *a) {
   vec vi, rni;
-  inputv = fopen("./data/in_cond_vel.dat","r");
+  FILE *inputv = fopen(restartvelfilepath,"r");
   for (int i = 0; i < npart; i++) {
     fscanf(inputv, "%g %g %g\n", &(vi.x), &(vi.y), &(vi.z));
     rni.x = r[i].x + vi.x * dt + 0.5 * dtsquare * a[i].x / m;

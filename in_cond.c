@@ -27,12 +27,12 @@ void fcc(void) {
   float semi_lattice_len_y =  nparty*a_lattice/2.;
   float semi_lattice_len_z = nlayers*a_lattice/2.;
   
-  cond_in = fopen("./data/in_cond.xyz","w");
+  FILE *cond_in = fopen(restartcoordfilepath,"w");
   if (!cond_in) {
     perror("fopen cond_in");
     exit(1);
   }
-  cond_in_vel = fopen("./data/in_cond_vel.dat","w");
+  FILE *cond_in_vel = fopen(restartvelfilepath,"w");
   if (!cond_in_vel) {
     perror("fopen cond_in_vel");
     exit(1);
@@ -78,7 +78,7 @@ void fcc(void) {
 
 
 void load_r(vec *r) {
-  inputr = fopen("./data/in_cond.xyz","r");
+  FILE *inputr = fopen(restartcoordfilepath,"r");
   fscanf(inputr,"%i\n\n",&garb);
   for (int i = 0; i < npart; i++) {
     fscanf(inputr,"atomX %g %g %g\n", &(r[i].x), &(r[i].y), &(r[i].z));
@@ -99,7 +99,7 @@ void load_r_2(FILE *inputhere, vec *r) {
 void write_stat(void) {
   kenergy = kenergy * 0.5 * m;
   reduced_temperature = 2. * kenergy / ((npart - 3.) * eps);
-  fprintf(stat,"%g %g %g %g %g %g %g %g\n", t*dt + last_durata_totale, sumv.x, sumv.y, sumv.z, kenergy, penergy, kenergy + penergy, reduced_temperature);
+  fprintf(statfile,"%g %g %g %g %g %g %g %g\n", t*dt + last_durata_totale, sumv.x, sumv.y, sumv.z, kenergy, penergy, kenergy + penergy, reduced_temperature);
 }
 
 
@@ -119,7 +119,5 @@ void write_vi(FILE *output_file) {
 
 
 void write_durata_totale(void) {
-  file_durata_totale = fopen("./data/durata_totale.dat","w");
-  fprintf(file_durata_totale,"%g\n%i\n",t*dt + last_durata_totale, nrun);
-  fclose(file_durata_totale);
+  fprintf(totdurationfile,"%g\n%i\n",t*dt + last_durata_totale, nrun);
 }

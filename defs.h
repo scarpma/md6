@@ -10,9 +10,24 @@ int t, npartx, nparty, nlayers, npart, write_jump, timesteps, newc, nrun, garb;
 float dt, dtsquare, dtdouble, eps, sigma, mu, var, m, a_lattice, last_durata_totale;
 float r_max, pot_trunc_perc, BOXL, r_max_squared, shift, penergy, rij2;
 float kenergy, simforceij, reduced_temperature, reduced_density;
-FILE *output, *cond_in, *cond_in_vel, *logfile, *param, *file_durata_totale;
-FILE *inputr, *inputv, *stat, *output_in_cond, *output_in_cond_vel;
+#define STRLEN 256
+char paramfilepath[STRLEN], logfilepath[STRLEN];
+char statfilepath[STRLEN], statfilepath[STRLEN];
+char coordfilepath[STRLEN], restartcoordfilepath[STRLEN];
+char restartvelfilepath[STRLEN], autodiffusionfilepath[STRLEN];
+char totdurationfilepath[STRLEN], corrfuncfilepath[STRLEN];
+
+FILE *paramfile, *logfile, *statfile;
+FILE *coordfile, *restartcoordfile, *restartvelfile;
+FILE *totdurationfile, *autodiffusionfile;
+FILE *corrfuncfile;
+
+//FILE *output, *cond_in, *cond_in_vel, *logfile, *param, *file_durata_totale;
+//FILE *inputr, *inputv, *stat, *output_in_cond, *output_in_cond_vel;
+
+
 vec rij, sumv, vi, rni;
+
 
 float GaussianNoise(float mu, float var);
 void fcc(void);

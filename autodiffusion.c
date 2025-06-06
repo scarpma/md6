@@ -4,32 +4,35 @@
 #include "defs.h"
 
 
-int main() {
+#define CHECK_FILE(ptr, name) \
+  if (!(ptr)) { perror("fopen " #name); exit(1); }
+
+int main(int argc, char *argv[]) {
+  // CHECK IF COMMAND LINE ARGUMENTS ARE PROVIDED
+  if (argc < 2) {fprintf(stderr, "Usage: %s <input_file_path>\n", argv[0]); return -1;}
   // APRO FILES E LI INIZIALIZZO
-  param = fopen("./param.in","r");
-  inputr = fopen("./data/verlet_periodic.xyz","r");
-  output = fopen("./data/autodiffusion.dat","w");
+  snprintf(paramfilepath,         STRLEN, "%s/param.in",            argv[1]);
+  snprintf(coordfilepath,         STRLEN, "%s/verlet_periodic.xyz", argv[1]);
+  snprintf(autodiffusionfilepath, STRLEN, "%s/autodiffusion.dat",   argv[1]);
+  paramfile        = fopen(paramfilepath,            "r");
+  coordfile        = fopen(coordfilepath,            "r");
+  autodiffusionfile   = fopen(autodiffusionfilepath, "w");
 
-  // CARICO PARAMETRI DA PARAM.IN
-  fscanf(param,"npartx=%i\nnparty=%i\nnlayers=%i\nnpart=%i\nwrite_jump=%i\ntimesteps=%i\ndt=%g\neps=%g\nsigma=%g\nmu=%g\nvar=%g\nm=%g\na_lattice=%g\npot_trunc_perc=%g\nnew_in_cond=%i",&npartx,&nparty,&nlayers,&npart,&write_jump,&timesteps,&dt,&eps,&sigma,&mu,&var,&m,&a_lattice,&pot_trunc_perc,&newc);
-  fclose(param);
+  // READ PARAMETERS
+  fscanf(paramfile,"npartx=%i\nnparty=%i\nnlayers=%i\nnpart=%i\nwrite_jump=%i\ntimesteps=%i\ndt=%g\neps=%g\nsigma=%g\nmu=%g\nvar=%g\nm=%g\na_lattice=%g\npot_trunc_perc=%g\nnew_in_cond=%i",&npartx,&nparty,&nlayers,&npart,&write_jump,&timesteps,&dt,&eps,&sigma,&mu,&var,&m,&a_lattice,&pot_trunc_perc,&newc);
+  fclose(paramfile);
 
-  // INIZIALIZZO VARIABILI DA PARAMETRI
+  // INITIALIZE VARIABLES
   dtdouble = 2.*dt;
   dtsquare = pow(dt, 2.);
-  r_max = sigma * pow((1+sqrt( 1-16*pot_trunc_perc ))/( 2*pot_trunc_perc ), 1./6.);  /*impostando la percentuale di troncamento del potenziale, posso calcolare rmax sapendo che è il valore in cui il potenziale raggiunge quella percentuale impostata */
+  r_max = sigma * pow((1+sqrt( 1-16*pot_trunc_perc ))/( 2*pot_trunc_perc ), 1./6.);  /*r_max IS COMPUTED BASED ON pot_trunc_perc, i.e. when POTENTIAL REACHES pot_trunc_perc OF ITS MAX VALUE*/
   r_max_squared = pow(r_max, 2.);
-  shift = potenergy(r_max, eps, sigma); // per lo shift del potenziale
-  BOXL = ( 0.5 + nlayers ) * a_lattice; // (0.5 + max(npartx,nparty,nlayers) * a_lattice è la lunghezza  del reticolo nella direzione che la rende massima)
+  shift = potenergy(r_max, eps, sigma); // POTENTIAL SHIFT
+  BOXL = ( 0.5 + nlayers ) * a_lattice; // (0.5 + max(npartx,nparty,nlayers) * a_lattice IS THE LATTICE LENGHT IN EACH DIRECTION)
   reduced_density = npart * sigma / pow(BOXL, 3.);
 
-
-
-
   // CARICO DURATA TOTALE
-  file_durata_totale = fopen("./data/durata_totale.dat","r");
-  fscanf(file_durata_totale,"%g\n%i\n",&last_durata_totale,&nrun);
-  fclose(file_durata_totale);
+  fscanf(totdurationfile,"%g\n%i\n",&last_durata_totale,&nrun);
   
   // INIZIALIZZO VARIABILI AUTODIFFUSION
   int ntime = timesteps / write_jump;
@@ -37,14 +40,14 @@ int main() {
   float time;
 
   // INIZIALIZZO FILE OUTPUT
-  fprintf(output, "#    t(1)      varx(2)      vary(3)      varz(3)\n");
+  fprintf(autodiffusionfile, "#    t(1)      varx(2)      vary(3)      varz(3)\n");
   
   // CICLO SUI TEMPI
 
   for (int j = 0; j < ntime; j++) { // ciclo su ogni istante di tempo (scritto nel file)
 
     // CARICO r e rin
-    load_r_2(inputr, r);
+    load_r_2(coordfile, r);
     // for (int i = 0; i < npart; i++) printf("%g %g %g\n",r[i].x,r[i].y,r[i].z);
     if (j == 0) {  
       for (int i = 0; i < npart; i++) {
@@ -72,7 +75,7 @@ int main() {
     var.x = var.x/npart;
     var.y = var.y/npart;
     var.z = var.z/npart;
-    fprintf(output, "%g %g %g %g\n",time,var.x,var.y,var.z);
+    fprintf(autodiffusionfile, "%g %g %g %g\n",time,var.x,var.y,var.z);
 
   }
 }

@@ -3,18 +3,38 @@
 #include <math.h>
 #include "defs.h"
 
+#define CHECK_FILE(ptr, name) \
+  if (!(ptr)) { perror("fopen " #name); exit(1); }
 
-int main() {
+int main(int argc, char *argv[]) {
+  // CHECK IF COMMAND LINE ARGUMENTS ARE PROVIDED
+  if (argc < 2) {fprintf(stderr, "Usage: %s <input_file_path>\n", argv[0]); return -1;}
+  // WRITE INPUT AND OUTPUT PATHS
+  snprintf(paramfilepath,        STRLEN, "%s/param.in",            argv[1]);
+  snprintf(logfilepath,          STRLEN, "%s/run.log",             argv[1]);
+  snprintf(statfilepath,         STRLEN, "%s/stat.dat",            argv[1]);
+  snprintf(coordfilepath,        STRLEN, "%s/verlet_periodic.xyz", argv[1]);
+  snprintf(restartcoordfilepath, STRLEN, "%s/in_cond.xyz",         argv[1]);
+  snprintf(restartvelfilepath,   STRLEN, "%s/in_cond_vel.dat",     argv[1]);
+  snprintf(restartvelfilepath,   STRLEN, "%s/in_cond_vel.dat",     argv[1]);
+  snprintf(totdurationfilepath,  STRLEN, "%s/tot_duration.dat",     argv[1]);
+  paramfile        = fopen(paramfilepath, "r");
+  logfile          = fopen(logfilepath, "w");
+  statfile         = fopen(statfilepath, "w");
+  coordfile        = fopen(coordfilepath, "w");
+  restartcoordfile = fopen(restartcoordfilepath, "w");
+  restartvelfile   = fopen(restartvelfilepath, "w");
+  totdurationfile  = fopen(totdurationfilepath, "w");
+  CHECK_FILE(paramfile,        paramfilepath);
+  CHECK_FILE(logfile,          logfilepath);
+  CHECK_FILE(statfile,         statfilepath);
+  CHECK_FILE(coordfile,        coordfilepath);
+  CHECK_FILE(restartcoordfile, restartcoordfilepath);
+  CHECK_FILE(restartvelfile,   restartvelfilepath);
 
-  // OPEN PARAMETER FILE
-  param = fopen("./param.in","r");
-  if (!param) {
-    perror("fopen param");
-    exit(1);
-  }
   // READ PARAMETERS
-  fscanf(param,"npartx=%i\nnparty=%i\nnlayers=%i\nnpart=%i\nwrite_jump=%i\ntimesteps=%i\ndt=%g\neps=%g\nsigma=%g\nmu=%g\nvar=%g\nm=%g\na_lattice=%g\npot_trunc_perc=%g\nnew_in_cond=%i",&npartx,&nparty,&nlayers,&npart,&write_jump,&timesteps,&dt,&eps,&sigma,&mu,&var,&m,&a_lattice,&pot_trunc_perc,&newc);
-  fclose(param);
+  fscanf(paramfile,"npartx=%i\nnparty=%i\nnlayers=%i\nnpart=%i\nwrite_jump=%i\ntimesteps=%i\ndt=%g\neps=%g\nsigma=%g\nmu=%g\nvar=%g\nm=%g\na_lattice=%g\npot_trunc_perc=%g\nnew_in_cond=%i",&npartx,&nparty,&nlayers,&npart,&write_jump,&timesteps,&dt,&eps,&sigma,&mu,&var,&m,&a_lattice,&pot_trunc_perc,&newc);
+  fclose(paramfile);
   // INITIALIZE VARIABLES
   dtdouble = 2.*dt;
   dtsquare = pow(dt, 2.);
@@ -24,60 +44,35 @@ int main() {
   BOXL = ( 0.5 + nlayers ) * a_lattice; // (0.5 + max(npartx,nparty,nlayers) * a_lattice IS THE LATTICE LENGHT IN EACH DIRECTION)
   reduced_density = npart * sigma / pow(BOXL, 3.);
 
-  // RESTART OLD SIMULATION OR START FROM SCRATCH
-  if (newc == 0) {
-    logfile = fopen("./salvati/run.log", "a");
-    if (!logfile) {
-      perror("fopen logfile");
-      exit(1);
-    }
-    file_durata_totale = fopen("./data/durata_totale.dat","r");
-    fscanf(file_durata_totale,"%g\n%i\n",&last_durata_totale,&nrun);
-    nrun = nrun + 1;
-    fclose(file_durata_totale);
-    printf("Proseguo ultima simulazione. nrun = %d, t_in = %.2f\n",nrun,last_durata_totale);
-    fprintf(logfile,"Proseguo ultima simulazione. nrun = %d, t_in = %.2f\n",nrun,last_durata_totale);
-  } else if (newc == 1) {
-    int status = system("./del-data");
-    status = system("mkdir ./salvati");
-    status = system("mkdir ./data");
-    printf("r_max=%g    BOXL=%g    red. dens=%g\n",r_max,BOXL,reduced_density);
-    nrun = 0;
-    last_durata_totale = 0.;
-    logfile = fopen("./salvati/run.log", "w");
-    if (!logfile) {
-      perror("fopen logfile");
-      exit(1);
-    }
-    printf("Initialize FCC lattice and random velocities.\n");
-    fprintf(logfile,"start new simulation:\n\nPARAM:\n");
-    fprintf(logfile,"npartx=%i\nnparty=%i\n",npartx,nparty);
-    fprintf(logfile,"nlayers=%i\nnpart=%i\n",nlayers,npart);
-    fprintf(logfile,"write_jump=%i\ntimesteps=%i\n",write_jump,timesteps);
-    fprintf(logfile,"dt=%g\neps=%g\nsigma=%g\n",dt,eps,sigma);
-    fprintf(logfile,"mu=%g\nvar=%g\nm=%g\na_lattice=%g\n",mu,var,m,a_lattice);
-    fprintf(logfile,"pot_trunc_perc=%g\nnew_in_cond=%i\n\n\n",pot_trunc_perc,newc);
-    fprintf(logfile,"Initialize FCC lattice and random velocities\n\n");
-    fprintf(logfile, "r_max=%g    BOXL=%g    red. dens=%g\n",r_max,BOXL,reduced_density);
-    fcc();
-  }
+  if (newc==0) {printf("Restart simulation feature not available. Stoppingi\n"); return -1;}
+  int status = system("./del-data");
+  status = system("mkdir ./salvati");
+  status = system("mkdir ./data");
+  printf("r_max=%g    BOXL=%g    red. dens=%g\n",r_max,BOXL,reduced_density);
+  nrun = 0;
+  last_durata_totale = 0.;
+  printf("Initialize FCC lattice and random velocities.\n");
+  fprintf(logfile,"start new simulation:\n\nPARAM:\n");
+  fprintf(logfile,"npartx=%i\nnparty=%i\n",npartx,nparty);
+  fprintf(logfile,"nlayers=%i\nnpart=%i\n",nlayers,npart);
+  fprintf(logfile,"write_jump=%i\ntimesteps=%i\n",write_jump,timesteps);
+  fprintf(logfile,"dt=%g\neps=%g\nsigma=%g\n",dt,eps,sigma);
+  fprintf(logfile,"mu=%g\nvar=%g\nm=%g\na_lattice=%g\n",mu,var,m,a_lattice);
+  fprintf(logfile,"pot_trunc_perc=%g\nnew_in_cond=%i\n\n\n",pot_trunc_perc,newc);
+  fprintf(logfile,"Initialize FCC lattice and random velocities\n\n");
+  fprintf(logfile, "r_max=%g    BOXL=%g    red. dens=%g\n",r_max,BOXL,reduced_density);
+  fcc();
     
     
   // OPEN OUTPUT FILES AND WRITE HEADERS
-  stat = fopen("./data/stat.dat","w");
-  if (!stat) {
-    perror("fopen stat");
-    exit(1);
-  }
-  fprintf(stat,"# t(0)   sumvx(1)   sumvy(2)   sumvz(3)    kenergy(4)   penergy(5)   energy(6)   red_temp(7)\n");
-  output = fopen("./data/verlet_periodic.xyz","w");
+  fprintf(statfile,"# t(0)   sumvx(1)   sumvy(2)   sumvz(3)    kenergy(4)   penergy(5)   energy(6)   red_temp(7)\n");
     
   // DECLARE VARIABLES
   vec r[npart], ro[npart], a[npart];
   
   // LOAD INITIAL CONDITIONS
   load_r(r);
-  write_r(output, r);
+  write_r(coordfile, r);
   printf("Integration started:\n\n");
   fprintf(logfile, "Integration started: wait!\n\n");
     for (int i = 0; i < npart; i++) {
@@ -87,7 +82,7 @@ int main() {
     }
   compute_forces(r, a);
   eulero(r, ro, a);
-  write_r(output, r);
+  write_r(coordfile, r);
 
 
   // CHECK PARTICLES INSIDE BOX
@@ -114,20 +109,19 @@ int main() {
   }
   
   // LAST TIME STEP
-  output_in_cond = fopen("./data/in_cond.xyz","w");
-    output_in_cond_vel = fopen("./data/in_cond_vel.dat","w");
   compute_forces_stat(r, a);
-    verlet_periodic_last(r, ro, a); t++;
+  verlet_periodic_last(r, ro, a); t++;
   write_durata_totale();
   
   // CLOSE FILES
-  fclose(output);
-  fclose(output_in_cond);
-  fclose(output_in_cond_vel);
-  fclose(stat);
+  fclose(coordfile);
+  fclose(restartcoordfile);
+  fclose(restartvelfile);
+  fclose(statfile);
   printf("Done!\n\n");
   fprintf(logfile, "Done!\n\n\n\n\n\n\n\n");
   fclose(logfile);
+  fclose(totdurationfile);
 }
 
 /*
