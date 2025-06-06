@@ -14,9 +14,15 @@ int main(int argc, char *argv[]) {
   snprintf(paramfilepath,         STRLEN, "%s/param.in",            argv[1]);
   snprintf(coordfilepath,         STRLEN, "%s/verlet_periodic.xyz", argv[1]);
   snprintf(autodiffusionfilepath, STRLEN, "%s/autodiffusion.dat",   argv[1]);
-  paramfile        = fopen(paramfilepath,            "r");
-  coordfile        = fopen(coordfilepath,            "r");
-  autodiffusionfile   = fopen(autodiffusionfilepath, "w");
+  snprintf(totdurationfilepath,   STRLEN, "%s/tot_duration.dat",    argv[1]);
+  paramfile         = fopen(paramfilepath,            "r");
+  coordfile         = fopen(coordfilepath,            "r");
+  autodiffusionfile = fopen(autodiffusionfilepath, "w");
+  totdurationfile   = fopen(totdurationfilepath, "r");
+  CHECK_FILE(paramfile,        paramfilepath);
+  CHECK_FILE(coordfile,        coordfilepath);
+  CHECK_FILE(autodiffusionfile,autodiffusionfilepath);
+  CHECK_FILE(totdurationfile,  totdurationfilepath);
 
   // READ PARAMETERS
   fscanf(paramfile,"npartx=%i\nnparty=%i\nnlayers=%i\nnpart=%i\nwrite_jump=%i\ntimesteps=%i\ndt=%g\neps=%g\nsigma=%g\nmu=%g\nvar=%g\nm=%g\na_lattice=%g\npot_trunc_perc=%g\nnew_in_cond=%i",&npartx,&nparty,&nlayers,&npart,&write_jump,&timesteps,&dt,&eps,&sigma,&mu,&var,&m,&a_lattice,&pot_trunc_perc,&newc);
