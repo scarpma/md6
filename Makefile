@@ -1,6 +1,6 @@
 all: ./exec/main ./exec/autodiffusion ./exec/corr_func
 
-OBJS = ./exec/verlet_periodic.o ./exec/in_cond.o
+OBJS = ./exec/verlet_periodic.o ./exec/in_cond.o ./exec/write_to_vtk.o
 
 CC = cc -O3
 
@@ -26,6 +26,9 @@ CC = cc -O3
 	$(CC) -o $@ -c $<
 
 ./exec/in_cond.o: in_cond.c
+	$(CC) -o $@ -c $<
+
+./exec/write_to_vtk.o: write_to_vtk.c
 	$(CC) -o $@ -c $<
 
 clean:

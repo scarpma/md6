@@ -49,4 +49,6 @@ void verlet_periodic_last(vec *r, vec *ro, vec *a);
 void compute_forces(vec *r, vec *a);
 void compute_forces_stat(vec *r, vec *a);
 void eulero(vec *r, vec *ro, vec *a);
+void writePointCloudToVTK(const char *filename, const vec *points, int numPoints);
+void writePointCloudToVTKBinary(const char *filename, const vec *points, int numPoints);
 

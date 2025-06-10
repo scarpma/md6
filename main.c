@@ -32,6 +32,7 @@ int main(int argc, char *argv[]) {
   CHECK_FILE(restartcoordfile, restartcoordfilepath);
   CHECK_FILE(restartvelfile,   restartvelfilepath);
   CHECK_FILE(totdurationfile,  totdurationfilepath);
+  char vtkfilename[STRLEN];
 
   // READ PARAMETERS
   fscanf(paramfile,"npartx=%i\nnparty=%i\nnlayers=%i\nnpart=%i\nwrite_jump=%i\ntimesteps=%i\ndt=%g\neps=%g\nsigma=%g\nmu=%g\nvar=%g\nm=%g\na_lattice=%g\npot_trunc_perc=%g\nnew_in_cond=%i",&npartx,&nparty,&nlayers,&npart,&write_jump,&timesteps,&dt,&eps,&sigma,&mu,&var,&m,&a_lattice,&pot_trunc_perc,&newc);
@@ -96,13 +97,17 @@ int main(int argc, char *argv[]) {
   // VERLET INTEGRATION
   t = 2;
   for (int tt = 2; tt < (timesteps-1) / write_jump; tt++) {
-    for (int k = 0; k < write_jump; k++) {
+    for (int k = 0; k < write_jump; k++) { // iteration without stats
+                                           // and write to file
       compute_forces(r, a);
       verlet_periodic(r, ro, a);
       t++;
     }
     compute_forces_stat(r, a);
     verlet_periodic_write(r, ro, a);
+    snprintf(vtkfilename, STRLEN, "%s/particles_%08d.vtk", argv[1], tt);
+    writePointCloudToVTK(vtkfilename, r, npart);
+    //writePointCloudToVTKBinary(vtkfilename, r, npart); // does not work
     t++;
   }
   
