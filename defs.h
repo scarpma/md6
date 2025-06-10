@@ -9,6 +9,7 @@
 struct vec3d {float x, y, z;};
 typedef struct vec3d vec;
 
+int reproducible;
 int t, npartx, nparty, nlayers, npart, write_jump, timesteps, newc, nrun, garb;
 float dt, dtsquare, dtdouble, eps, sigma, mu, var, m, a_lattice, last_durata_totale;
 float r_max, pot_trunc_perc, BOXL, r_max_squared, shift, penergy, rij2;

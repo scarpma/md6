@@ -64,7 +64,11 @@ void fcc(void) {
 
   }
 
-  srand(time(NULL));
+  if (reproducible) {
+    srand(0);
+  } else {
+    srand(time(NULL));
+    }
   for (int i = 0; i < npart / 2; i++) { // npart / 2 perchè per annullare il momento e il momento angolare totale metto le velocità opposte a coppie
     v0.x = GaussianNoise(mu, var);
     v0.y = GaussianNoise(mu, var);
