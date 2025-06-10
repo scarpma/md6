@@ -44,7 +44,11 @@ int main(int argc, char *argv[]) {
   r_max = sigma * pow((1+sqrt( 1-16*pot_trunc_perc ))/( 2*pot_trunc_perc ), 1./6.);  /*r_max IS COMPUTED BASED ON pot_trunc_perc, i.e. when POTENTIAL REACHES pot_trunc_perc OF ITS MAX VALUE*/
   r_max_squared = pow(r_max, 2.);
   shift = potenergy(r_max, eps, sigma); // POTENTIAL SHIFT
-  BOXL = ( 0.5 + nlayers ) * a_lattice; // (0.5 + max(npartx,nparty,nlayers) * a_lattice IS THE LATTICE LENGHT IN EACH DIRECTION)
+  if (nlayers>1) {
+    BOXL = ( 0.5 + nlayers ) * a_lattice; // (0.5 + max(npartx,nparty,nlayers) * a_lattice IS THE LATTICE LENGHT IN EACH DIRECTION)
+  } else {
+    BOXL = npartx * a_lattice;
+  }
   reduced_density = npart * sigma / pow(BOXL, 3.);
 
   if (newc==0) {printf("Restart simulation feature not available. Stoppingi\n"); return -1;}
@@ -62,18 +66,21 @@ int main(int argc, char *argv[]) {
   fprintf(logfile,"reproducible=%i\n",reproducible);
   fprintf(logfile,"Initialize FCC lattice and random velocities\n\n");
   fprintf(logfile, "r_max=%g    BOXL=%g    red. dens=%g\n",r_max,BOXL,reduced_density);
-  set_initial_conditions();
     
     
   // OPEN OUTPUT FILES AND WRITE HEADERS
   fprintf(statfile,"# t(0)   sumvx(1)   sumvy(2)   sumvz(3)    kenergy(4)   penergy(5)   energy(6)   red_temp(7)\n");
     
   // DECLARE VARIABLES
-  vec r[npart], ro[npart], a[npart];
+  vec r[npart], ro[npart], v0[npart], a[npart];
+
+  set_initial_conditions(r, v0);
   
   // LOAD INITIAL CONDITIONS
-  load_r(r);
+  //load_r(r);
   write_r(coordfile, r);
+  snprintf(vtkfilename, STRLEN, "%s/particles_%08d.vtk", argv[1], 0);
+  writePointCloudToVTK(vtkfilename, r, npart);
   printf("Integration started:\n\n");
   fprintf(logfile, "Integration started: wait!\n\n");
     for (int i = 0; i < npart; i++) {
@@ -82,7 +89,8 @@ int main(int argc, char *argv[]) {
         a[i].z = 0.0;
     }
   compute_forces(r, a);
-  eulero(r, ro, a);
+  eulero(r, ro, v0, a);
+  if (nlayers==1) {for (int i = 0; i < npart; i++) {r[i].z=0.;}}
   write_r(coordfile, r);
 
 
@@ -104,21 +112,23 @@ int main(int argc, char *argv[]) {
       clock_t start = clock();
       compute_forces(r, a);
       verlet_periodic(r, ro, a);
+      if (nlayers==1) {for (int i = 0; i < npart; i++) {r[i].z=0.;}}
       t++;
       clock_t end = clock();
       double time_taken = ((double)(end - start)) / CLOCKS_PER_SEC;
-      printf("Iteration: %d, %.3f msec\n", k, time_taken*1000);
+      //printf("Iteration: %d, %.3f msec\n", k, time_taken*1000);
     }
     clock_t start = clock();
     compute_forces_stat(r, a);
     verlet_periodic_write(r, ro, a);
+    if (nlayers==1) {for (int i = 0; i < npart; i++) {r[i].z=0.;}}
     snprintf(vtkfilename, STRLEN, "%s/particles_%08d.vtk", argv[1], tt);
     writePointCloudToVTK(vtkfilename, r, npart);
     //writePointCloudToVTKBinary(vtkfilename, r, npart); // does not work
     t++;
     clock_t end = clock();
     double time_taken = ((double)(end - start)) / CLOCKS_PER_SEC;
-    printf("Write Iteration: %d, %.3f msec\n", tt, time_taken*1000);
+    //printf("Write Iteration: %d, %.3f msec\n", tt, time_taken*1000);
   }
   
   // LAST TIME STEP

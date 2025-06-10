@@ -26,15 +26,11 @@ FILE *coordfile, *restartcoordfile, *restartvelfile;
 FILE *totdurationfile, *autodiffusionfile;
 FILE *corrfuncfile;
 
-//FILE *output, *cond_in, *cond_in_vel, *logfile, *param, *file_durata_totale;
-//FILE *inputr, *inputv, *stat, *output_in_cond, *output_in_cond_vel;
-
-
 vec rij, sumv, vi, rni;
 
 
 float GaussianNoise(float mu, float var);
-void set_initial_conditions(void);
+void set_initial_conditions(vec *r, vec *v);
 void load_r(vec *r);
 void load_r_2(FILE *inputhere, vec *r);
 void write_stat(void);
@@ -49,7 +45,7 @@ void verlet_periodic_write(vec *r, vec *ro, vec *a);
 void verlet_periodic_last(vec *r, vec *ro, vec *a);
 void compute_forces(vec *r, vec *a);
 void compute_forces_stat(vec *r, vec *a);
-void eulero(vec *r, vec *ro, vec *a);
+void eulero(vec *r, vec *ro, vec *v0, vec *a);
 void writePointCloudToVTK(const char *filename, const vec *points, int numPoints);
 void writePointCloudToVTKBinary(const char *filename, const vec *points, int numPoints);
 

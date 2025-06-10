@@ -15,52 +15,69 @@ float GaussianNoise(float mu, float var){
 }
 
 
-void set_initial_conditions(void) {
-  if (npart != 4*nlayers*npartx*nparty) {
-    printf("** PROBLEMA **\nnpart non congruente!\n");
-    fprintf(logfile,"** PROBLEMA **\nnpart non congruente!\n");
+void set_initial_conditions(vec *r, vec *v0) {
+  if (nlayers==1) {
+    if (npartx*nparty!=npart) {
+      printf("** PROBLEMA **\nnpart non congruente!\n");
+      fprintf(logfile,"** PROBLEMA **\nnpart non congruente!\n");
+      //exit(-1);
+    }
+  } else {
+    if (npart != 4*nlayers*npartx*nparty) {
+      printf("** PROBLEMA **\nnpart non congruente!\n");
+      fprintf(logfile,"** PROBLEMA **\nnpart non congruente!\n");
+      exit(-1);
+    }
   }
-  vec r, v0; // giochetto velocità opposte a coppie (mom angolare e mom lineare circa nulli)
   float vxm = 0., vym = 0., vzm = 0.;
-  char AtomName[] = "atomX";
   float semi_lattice_len_x =  npartx*a_lattice/2.; // (0.5 + max(npartx-1,nparty-1,nlayers-1) * a_lattice è la lunghezza  del reticolo nella direzione che la rende massima)
   float semi_lattice_len_y =  nparty*a_lattice/2.;
   float semi_lattice_len_z = nlayers*a_lattice/2.;
   
-  FILE *cond_in = fopen(restartcoordfilepath,"w");
-  if (!cond_in) {
-    perror("fopen cond_in");
-    exit(1);
-  }
-  FILE *cond_in_vel = fopen(restartvelfilepath,"w");
-  if (!cond_in_vel) {
-    perror("fopen cond_in_vel");
-    exit(1);
-  }
+  int n = 0;
+  if (nlayers>1) {
+    /**** To create FCC 100 lattice*********/
+    for(int i = 0; i < npartx; i++){      // Number of Atoms in the X direction
+      for(int j = 0; j < nparty; j++){    // Number of Atoms in the Y direction
+        for(int k = 0; k < nlayers; k++) {// Number of layers in the Z direction
 
-  fprintf(cond_in,"%i\n\n",npart);
+          r[n].x = i * a_lattice - semi_lattice_len_x;
+          r[n].y = j * a_lattice - semi_lattice_len_y;
+          r[n].z = k * a_lattice - semi_lattice_len_z;
+          n++;
 
-  /**** To create FCC 100 lattice*********/
-  for(int i = 0; i < npartx; i++){            // Number of Atoms in the X direction
+          r[n].x = i * a_lattice - semi_lattice_len_x;
+          r[n].y = 0.5 * a_lattice +  j * a_lattice - semi_lattice_len_y;
+          r[n].z = 0.5 * a_lattice + k * a_lattice - semi_lattice_len_z;
+          n++;
 
-    for(int j = 0; j < nparty; j++){        // Number of Atoms in the Y direction
+          r[n].x = 0.5 * a_lattice + i * a_lattice - semi_lattice_len_x;
+          r[n].y = j * a_lattice - semi_lattice_len_y;
+          r[n].z = 0.5 * a_lattice + k *a_lattice - semi_lattice_len_z;
+          n++;
 
-      for(int k = 0; k < nlayers; k++) {       // Number of layers in the Z direction
-
-        r.x = i * a_lattice - semi_lattice_len_x;   r.y = j * a_lattice - semi_lattice_len_y;   r.z = k * a_lattice - semi_lattice_len_z;
-        fprintf(cond_in,"%s %lf %lf %lf\n", AtomName, r.x, r.y, r.z);
-
-        r.x = i * a_lattice - semi_lattice_len_x;   r.y = 0.5 * a_lattice +  j * a_lattice - semi_lattice_len_y;    r.z = 0.5 * a_lattice + k * a_lattice - semi_lattice_len_z;
-        fprintf(cond_in,"%s %lf %lf %lf\n", AtomName, r.x, r.y, r.z);
-
-        r.x = 0.5 * a_lattice + i * a_lattice - semi_lattice_len_x;  r.y = j * a_lattice - semi_lattice_len_y;   r.z = 0.5 * a_lattice + k *a_lattice - semi_lattice_len_z;
-        fprintf(cond_in,"%s %lf %lf %lf\n", AtomName, r.x, r.y, r.z);
-
-        r.x = 0.5 * a_lattice + i*a_lattice - semi_lattice_len_x;  r.y = 0.5 * a_lattice + j * a_lattice - semi_lattice_len_y;   r.z = k * a_lattice - semi_lattice_len_z;
-        fprintf(cond_in,"%s %lf %lf %lf\n", AtomName, r.x, r.y, r.z);
+          r[n].x = 0.5 * a_lattice + i*a_lattice - semi_lattice_len_x;
+          r[n].y = 0.5 * a_lattice + j * a_lattice - semi_lattice_len_y;
+          r[n].z = k * a_lattice - semi_lattice_len_z;
+          n++;
+        }
       }
-
-     }
+    }
+  } else {
+    /**** To create 2d FCC lattice*********/
+    int n = 0;
+    for(int i = 0; i < npartx; i++){
+      for(int j = 0; j < nparty; j++){
+        r[n].x = (i+0.5) * a_lattice - semi_lattice_len_x;
+        r[n].y = (j+0.5) * a_lattice - semi_lattice_len_y;
+        r[n].z = 0.;
+        n++;
+        r[n].x = (i+1) * a_lattice - semi_lattice_len_x;
+        r[n].y = (j+1) * a_lattice - semi_lattice_len_y;
+        r[n].z = 0.;
+        n++;
+      }
+    }
 
   }
 
@@ -69,15 +86,26 @@ void set_initial_conditions(void) {
   } else {
     srand(time(NULL));
     }
-  for (int i = 0; i < npart / 2; i++) { // npart / 2 perchè per annullare il momento e il momento angolare totale metto le velocità opposte a coppie
-    v0.x = GaussianNoise(mu, var);
-    v0.y = GaussianNoise(mu, var);
-    v0.z = GaussianNoise(mu, var);
-    fprintf(cond_in_vel,"%g %g %g\n",v0.x,v0.y,v0.z); // giochetto velocità opposte a coppie
-    fprintf(cond_in_vel,"%g %g %g\n",-v0.x,-v0.y,-v0.z);
+  for (int i = 0; i < npart-1; i=i+2) {
+    // npart / 2 perchè per annullare il momento
+    // e il momento angolare totale metto le velocità
+    // opposte a coppie
+    v0[i].x = GaussianNoise(mu, var);
+    v0[i].y = GaussianNoise(mu, var);
+    v0[i].z = GaussianNoise(mu, var);
+    v0[i+1].x = -v0[i].x;
+    v0[i+1].y = -v0[i].y;
+    v0[i+1].z = -v0[i].z;
   }
-  fclose(cond_in);
-  fclose(cond_in_vel);
+  //// shuffle the array using Fisher-Yates algorithm
+  //for (int i = npart-1; i > 0; --i) {
+  //  // Generate a random index j such that 0 <= j <= i
+  //  int j = rand()%(i + 1);
+  //  // Swap arr[i] with arr[j]
+  //  vec tmp = v0[i];
+  //  v0[i] = v0[j];
+  //  v0[j] = tmp;
+  //}
 }
 
 
