@@ -15,7 +15,7 @@ float GaussianNoise(float mu, float var){
 }
 
 
-void fcc(void) {
+void set_initial_conditions(void) {
   if (npart != 4*nlayers*npartx*nparty) {
     printf("** PROBLEMA **\nnpart non congruente!\n");
     fprintf(logfile,"** PROBLEMA **\nnpart non congruente!\n");

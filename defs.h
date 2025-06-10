@@ -34,7 +34,7 @@ vec rij, sumv, vi, rni;
 
 
 float GaussianNoise(float mu, float var);
-void fcc(void);
+void set_initial_conditions(void);
 void load_r(vec *r);
 void load_r_2(FILE *inputhere, vec *r);
 void write_stat(void);

@@ -62,7 +62,7 @@ int main(int argc, char *argv[]) {
   fprintf(logfile,"reproducible=%i\n",reproducible);
   fprintf(logfile,"Initialize FCC lattice and random velocities\n\n");
   fprintf(logfile, "r_max=%g    BOXL=%g    red. dens=%g\n",r_max,BOXL,reduced_density);
-  fcc();
+  set_initial_conditions();
     
     
   // OPEN OUTPUT FILES AND WRITE HEADERS
