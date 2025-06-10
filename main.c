@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <math.h>
 #include "defs.h"
+#include <time.h>
 
 #define CHECK_FILE(ptr, name) \
   if (!(ptr)) { perror("fopen " #name); exit(1); }
@@ -100,16 +101,24 @@ int main(int argc, char *argv[]) {
   for (int tt = 2; tt < (timesteps-1) / write_jump; tt++) {
     for (int k = 0; k < write_jump; k++) { // iteration without stats
                                            // and write to file
+      clock_t start = clock();
       compute_forces(r, a);
       verlet_periodic(r, ro, a);
       t++;
+      clock_t end = clock();
+      double time_taken = ((double)(end - start)) / CLOCKS_PER_SEC;
+      printf("Iteration: %d, %.3f msec\n", k, time_taken*1000);
     }
+    clock_t start = clock();
     compute_forces_stat(r, a);
     verlet_periodic_write(r, ro, a);
     snprintf(vtkfilename, STRLEN, "%s/particles_%08d.vtk", argv[1], tt);
     writePointCloudToVTK(vtkfilename, r, npart);
     //writePointCloudToVTKBinary(vtkfilename, r, npart); // does not work
     t++;
+    clock_t end = clock();
+    double time_taken = ((double)(end - start)) / CLOCKS_PER_SEC;
+    printf("Write Iteration: %d, %.3f msec\n", tt, time_taken*1000);
   }
   
   // LAST TIME STEP
