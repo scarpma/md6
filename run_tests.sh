@@ -5,5 +5,9 @@ for dir in test_*/; do
   echo "Doing test ${dir}"
   echo "==========================="
   echo ""
-  ./exec/main $dir && (cd $dir && python3 analyze.py)
+  if [ -f $dir/"param.in" ]; then
+    ./exec/main $dir && (cd $dir && python3 analyze.py)
+  else
+    ./${dir}/test.sh
+  fi
 done

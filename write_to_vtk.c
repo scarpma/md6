@@ -38,6 +38,45 @@ void writePointCloudToVTK(const char *filename, const vec *points, int numPoints
     // printf("Successfully wrote point cloud to %s\n", filename);
 }
 
+int readPointCloudFromVTK(const char *filename, vec *points, int numPoints) {
+  FILE *fp = NULL;
+
+  // Open the file for writing
+  fp = fopen(filename, "r");
+  if (fp == NULL) {
+      perror("Error opening file");
+      return -1;
+  }
+
+  char buffer[STRLEN];  // Buffer to hold the line
+
+  // # vtk DataFile Version 2.0
+  fgets(buffer, sizeof(buffer), fp);
+  // Point Cloud
+  fgets(buffer, sizeof(buffer), fp);
+  // ASCII
+  fgets(buffer, sizeof(buffer), fp);
+  // DATASET POLYDATA
+  fgets(buffer, sizeof(buffer), fp);
+  // "POINTS %d float\n", numPoints
+  fgets(buffer, sizeof(buffer), fp);
+  int numPointsRead;
+  sscanf(buffer, "POINTS %d float", &numPointsRead);
+  if (numPointsRead!=numPoints) {
+    printf("ERROR: numPoints %d numPointsRead %d. Aborting read.",
+           numPoints, numPointsRead);
+    return -1;
+  }
+  printf("Reading vtk file:\nparsed numPoints: %d\n", numPoints);
+  for (int i = 0; i < numPoints; i++) {
+    //"%f %f %f\n", points[i].x, points[i].y, points[i].z
+    fgets(buffer, sizeof(buffer), fp);
+    sscanf(buffer, "%f %f %f", &points[i].x, &points[i].y, &points[i].z);
+  }
+  fclose(fp);
+  return 0;
+}
+
 void writePointCloudToVTKBinary(const char *filename, const vec *points, int numPoints) {
     FILE *fp = NULL;
 
