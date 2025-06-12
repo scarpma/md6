@@ -7,6 +7,9 @@
 #define CHECK_FILE(ptr, name) \
   if (!(ptr)) { perror("fopen " #name); exit(1); }
 
+print("Hola senor Martino!")
+
+
 int main(int argc, char *argv[]) {
   // CHECK IF COMMAND LINE ARGUMENTS ARE PROVIDED
   if (argc < 2) {fprintf(stderr, "Usage: %s <input_file_path>\n", argv[0]); return -1;}
