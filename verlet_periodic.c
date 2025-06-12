@@ -41,14 +41,13 @@ void verlet_periodic(vec *r, vec *ro, vec *a, params p) {
 }
 
 // VERLET CON CALCOLO MOMENTO ED ENERGIA TOTALE
-void verlet_periodic_write(float t, vec *r, vec *ro, vec *a, params p) {
+void verlet_periodic_write(float t, vec *r, vec *ro, vec *a, float penergy, params p) {
   vec rni, vi, sumv;
-  float kenergy, penergy;
+  float kenergy;
   sumv.x = 0.;
   sumv.y = 0.;
   sumv.z = 0.;
   kenergy = 0.;
-  penergy = 0.;
   for (int i = 0; i < p.npart; i++) {
     rni.x = 2.0 * r[i].x - ro[i].x + p.dtsquare * a[i].x / p.m;
     rni.y = 2.0 * r[i].y - ro[i].y + p.dtsquare * a[i].y / p.m;
@@ -78,14 +77,13 @@ void verlet_periodic_write(float t, vec *r, vec *ro, vec *a, params p) {
 }
 
 
-void verlet_periodic_last(float t, vec *r, vec *ro, vec *a, params p) {
+void verlet_periodic_last(float t, vec *r, vec *ro, vec *a, float penergy, params p) {
   vec rni, vi, sumv;
-  float kenergy, penergy;
+  float kenergy;
   sumv.x = 0.;
   sumv.y = 0.;
   sumv.z = 0.;
   kenergy = 0.;
-  penergy = 0.;
   for (int i = 0; i < p.npart; i++) {
     rni.x = 2.0 * r[i].x - ro[i].x + p.dtsquare * a[i].x / p.m;
     rni.y = 2.0 * r[i].y - ro[i].y + p.dtsquare * a[i].y / p.m;
@@ -147,7 +145,7 @@ void compute_forces(vec *r, vec *a, params p) {
 }
 
 
-void compute_forces_stat(vec *r, vec *a, params p) {
+float compute_forces_stat(vec *r, vec *a, params p) {
   vec rij;
   float rij2, simforceij;
   float penergy = 0.;
@@ -177,6 +175,7 @@ void compute_forces_stat(vec *r, vec *a, params p) {
       }
     }
   }
+  return penergy;
 }
 
 

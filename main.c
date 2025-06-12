@@ -10,6 +10,7 @@
 int main(int argc, char *argv[]) {
   params p;
   int t;
+  float penergy;
   printf("Ciao dal corso, (non) sono Filippo. Chi sono?\n");
   printf("Hola senor Martino 💃💃💃💃💃💃💃!\n");
   // CHECK IF COMMAND LINE ARGUMENTS ARE PROVIDED
@@ -111,8 +112,8 @@ int main(int argc, char *argv[]) {
       //printf("Iteration: %d, %.3f msec\n", k, time_taken*1000);
     }
     clock_t start = clock();
-    compute_forces_stat(r, a, p);
-    verlet_periodic_write(t, r, ro, a, p);
+    penergy = compute_forces_stat(r, a, p);
+    verlet_periodic_write(t, r, ro, a, penergy, p);
     snprintf(vtkfilename, STRLEN, "%s/particles_%08d.vtk", argv[1], tt);
     writePointCloudToVTK(vtkfilename, r, p.npart);
     //writePointCloudToVTKBinary(vtkfilename, r, npart); // does not work
@@ -123,8 +124,8 @@ int main(int argc, char *argv[]) {
   }
   
   // LAST TIME STEP
-  compute_forces_stat(r, a, p);
-  verlet_periodic_last(t, r, ro, a, p); t++;
+  penergy = compute_forces_stat(r, a, p);
+  verlet_periodic_last(t, r, ro, a, penergy, p); t++;
   
   // CLOSE FILES
   fclose(p.coordfile);
