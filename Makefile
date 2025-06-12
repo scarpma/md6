@@ -1,8 +1,8 @@
-all: ./exec/main ./exec/autodiffusion ./exec/corr_func
+all: ./exec/main# ./exec/autodiffusion ./exec/corr_func
 
 OBJS = ./exec/verlet_periodic.o ./exec/in_cond.o ./exec/write_to_vtk.o
 
-CC = cc -O3
+CC = cc -O0 -ggdb -fmax-errors=3
 
 ./exec/main: ./exec/main.o $(OBJS)
 	$(CC) -o $@ ./exec/main.o $(OBJS) -lm

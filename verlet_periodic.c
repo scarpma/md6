@@ -21,18 +21,19 @@ float simforce(float r, float eps, float sigma) {
 }
 
 // VERLET
-void verlet_periodic(vec *r, vec *ro, vec *a) {
-  for (int i = 0; i < npart; i++) { // integrazione quando non devo scrivere nel file
-    rni.x = 2.0 * r[i].x - ro[i].x + dtsquare * a[i].x / m;
-    rni.y = 2.0 * r[i].y - ro[i].y + dtsquare * a[i].y / m;
-    rni.z = 2.0 * r[i].z - ro[i].z + dtsquare * a[i].z / m;
+void verlet_periodic(vec *r, vec *ro, vec *a, params p) {
+  vec rni;
+  for (int i = 0; i < p.npart; i++) { // integrazione quando non devo scrivere nel file
+    rni.x = 2.0 * r[i].x - ro[i].x + p.dtsquare * a[i].x / p.m;
+    rni.y = 2.0 * r[i].y - ro[i].y + p.dtsquare * a[i].y / p.m;
+    rni.z = 2.0 * r[i].z - ro[i].z + p.dtsquare * a[i].z / p.m;
           // printf("VERLET%g %g %g\n",rni.x,rni.y,rni.z);
     ro[i].x = r[i].x;
     ro[i].y = r[i].y;
     ro[i].z = r[i].z;
-    r[i].x = rni.x - BOXL * round( rni.x / BOXL );
-    r[i].y = rni.y - BOXL * round( rni.y / BOXL );
-    r[i].z = rni.z - BOXL * round( rni.z / BOXL );
+    r[i].x = rni.x - p.BOXL * round( rni.x / p.BOXL );
+    r[i].y = rni.y - p.BOXL * round( rni.y / p.BOXL );
+    r[i].z = rni.z - p.BOXL * round( rni.z / p.BOXL );
     a[i].x = 0.;
     a[i].y = 0.;
     a[i].z = 0.;
@@ -40,27 +41,35 @@ void verlet_periodic(vec *r, vec *ro, vec *a) {
 }
 
 // VERLET CON CALCOLO MOMENTO ED ENERGIA TOTALE
-void verlet_periodic_write(vec *r, vec *ro, vec *a) {
-  for (int i = 0; i < npart; i++) {
-    rni.x = 2.0 * r[i].x - ro[i].x + dtsquare * a[i].x / m;
-    rni.y = 2.0 * r[i].y - ro[i].y + dtsquare * a[i].y / m;
-    rni.z = 2.0 * r[i].z - ro[i].z + dtsquare * a[i].z / m;
-    vi.x = (rni.x-ro[i].x-BOXL * round((rni.x-ro[i].x)/BOXL))/dtdouble; // faccio anche qui round per togliere velocità da un lato del box all'altro.
-    vi.y = (rni.y-ro[i].y-BOXL * round((rni.y-ro[i].y)/BOXL))/dtdouble;
-    vi.z = (rni.z-ro[i].z-BOXL * round((rni.z-ro[i].z)/BOXL))/dtdouble;
+void verlet_periodic_write(float t, vec *r, vec *ro, vec *a, params p) {
+  vec rni, vi, sumv;
+  float kenergy, penergy;
+  sumv.x = 0.;
+  sumv.y = 0.;
+  sumv.z = 0.;
+  kenergy = 0.;
+  penergy = 0.;
+  for (int i = 0; i < p.npart; i++) {
+    rni.x = 2.0 * r[i].x - ro[i].x + p.dtsquare * a[i].x / p.m;
+    rni.y = 2.0 * r[i].y - ro[i].y + p.dtsquare * a[i].y / p.m;
+    rni.z = 2.0 * r[i].z - ro[i].z + p.dtsquare * a[i].z / p.m;
+    vi.x = (rni.x-ro[i].x-p.BOXL * round((rni.x-ro[i].x)/p.BOXL))/p.dtdouble; // faccio anche qui round per togliere velocità da un lato del box all'altro.
+    vi.y = (rni.y-ro[i].y-p.BOXL * round((rni.y-ro[i].y)/p.BOXL))/p.dtdouble;
+    vi.z = (rni.z-ro[i].z-p.BOXL * round((rni.z-ro[i].z)/p.BOXL))/p.dtdouble;
     ro[i].x = r[i].x;
     ro[i].y = r[i].y;
     ro[i].z = r[i].z;
-    r[i].x = rni.x - BOXL * round( rni.x / BOXL );
-    r[i].y = rni.y - BOXL * round( rni.y / BOXL );
-    r[i].z = rni.z - BOXL * round( rni.z / BOXL );
+    r[i].x = rni.x - p.BOXL * round( rni.x / p.BOXL );
+    r[i].y = rni.y - p.BOXL * round( rni.y / p.BOXL );
+    r[i].z = rni.z - p.BOXL * round( rni.z / p.BOXL );
     sumv.x += vi.x;
     sumv.y += vi.y;
     sumv.z += vi.z;
     kenergy += vi.x*vi.x + vi.y*vi.y + vi.z*vi.z;
     }
-  write_r(coordfile, r);
-  write_stat();
+  write_r(p.coordfile, r, p);
+  write_stat(t, sumv, kenergy, penergy, p);
+  // TODO remove this
   sumv.x = 0.0;
   sumv.y = 0.0;
   sumv.z = 0.0;
@@ -69,52 +78,61 @@ void verlet_periodic_write(vec *r, vec *ro, vec *a) {
 }
 
 
-void verlet_periodic_last(vec *r, vec *ro, vec *a) {
-  for (int i = 0; i < npart; i++) {
-    rni.x = 2.0 * r[i].x - ro[i].x + dtsquare * a[i].x / m;
-    rni.y = 2.0 * r[i].y - ro[i].y + dtsquare * a[i].y / m;
-    rni.z = 2.0 * r[i].z - ro[i].z + dtsquare * a[i].z / m;
-    vi.x = (rni.x-ro[i].x-BOXL * round((rni.x-ro[i].x)/BOXL))/dtdouble; // faccio anche qui round per togliere velocità da un lato del box all'altro.
-    vi.y = (rni.y-ro[i].y-BOXL * round((rni.y-ro[i].y)/BOXL))/dtdouble;
-    vi.z = (rni.z-ro[i].z-BOXL * round((rni.z-ro[i].z)/BOXL))/dtdouble;
+void verlet_periodic_last(float t, vec *r, vec *ro, vec *a, params p) {
+  vec rni, vi, sumv;
+  float kenergy, penergy;
+  sumv.x = 0.;
+  sumv.y = 0.;
+  sumv.z = 0.;
+  kenergy = 0.;
+  penergy = 0.;
+  for (int i = 0; i < p.npart; i++) {
+    rni.x = 2.0 * r[i].x - ro[i].x + p.dtsquare * a[i].x / p.m;
+    rni.y = 2.0 * r[i].y - ro[i].y + p.dtsquare * a[i].y / p.m;
+    rni.z = 2.0 * r[i].z - ro[i].z + p.dtsquare * a[i].z / p.m;
+    vi.x = (rni.x-ro[i].x-p.BOXL * round((rni.x-ro[i].x)/p.BOXL))/p.dtdouble; // faccio anche qui round per togliere velocità da un lato del box all'altro.
+    vi.y = (rni.y-ro[i].y-p.BOXL * round((rni.y-ro[i].y)/p.BOXL))/p.dtdouble;
+    vi.z = (rni.z-ro[i].z-p.BOXL * round((rni.z-ro[i].z)/p.BOXL))/p.dtdouble;
     ro[i].x = r[i].x;
     ro[i].y = r[i].y;
     ro[i].z = r[i].z;
-    r[i].x = rni.x - BOXL * round( rni.x / BOXL );
-    r[i].y = rni.y - BOXL * round( rni.y / BOXL );
-    r[i].z = rni.z - BOXL * round( rni.z / BOXL );
+    r[i].x = rni.x - p.BOXL * round( rni.x / p.BOXL );
+    r[i].y = rni.y - p.BOXL * round( rni.y / p.BOXL );
+    r[i].z = rni.z - p.BOXL * round( rni.z / p.BOXL );
     sumv.x += vi.x;
     sumv.y += vi.y;
     sumv.z += vi.z;
     kenergy += vi.x*vi.x + vi.y*vi.y + vi.z*vi.z;
-    write_vi(restartvelfile);
+    write_vi(p.restartvelfile, vi);
   }
-  write_r(coordfile, r);
-  write_r(restartcoordfile, r);
-  write_stat();
+  write_r(p.coordfile, r, p);
+  write_r(p.restartcoordfile, r, p);
+  write_stat(t, sumv, kenergy, penergy, p);
 }
 
 
-void compute_forces(vec *r, vec *a) {
-  for (int i = 0; i < npart; i++) {
+void compute_forces(vec *r, vec *a, params p) {
+  vec rij;
+  float rij2, simforceij;
+  for (int i = 0; i < p.npart; i++) {
     a[i].x = 0.;
     a[i].y = 0.;
     a[i].z = 0.;
     }
-  for (int i = 0; i < npart; i++) {
-    for (int j = i + 1; j < npart; j++) {
+  for (int i = 0; i < p.npart; i++) {
+    for (int j = i + 1; j < p.npart; j++) {
       rij.x = (r[i].x - r[j].x);
       rij.y = (r[i].y - r[j].y);
       rij.z = (r[i].z - r[j].z);
       // printf("FORCES DISTANCES %g %g %g\n",rij.x,rij.y,rij.z);
-      rij.x = rij.x - BOXL*round(rij.x/BOXL);
-      rij.y = rij.y - BOXL*round(rij.y/BOXL);
-      rij.z = rij.z - BOXL*round(rij.z/BOXL);
+      rij.x = rij.x - p.BOXL*round(rij.x/p.BOXL);
+      rij.y = rij.y - p.BOXL*round(rij.y/p.BOXL);
+      rij.z = rij.z - p.BOXL*round(rij.z/p.BOXL);
       rij2 = rij.x*rij.x + rij.y*rij.y + rij.z*rij.z;
       // printf("FORCES DISTANCES RESCALED %g %g %g\n",rij.x,rij.y,rij.z);
       // printf("FORCES DISTANCES RESCALED MOD %g\n",rij2);
-      if (rij2 < r_max_squared) {
-        simforceij = simforce(rij2, eps, sigma);
+      if (rij2 < p.r_max_squared) {
+        simforceij = simforce(rij2, p.eps, p.sigma);
         // printf("SIMFORCE %g\n",simforceij);
         a[i].x = a[i].x + simforceij * rij.x;
         a[i].y = a[i].y + simforceij * rij.y;
@@ -129,24 +147,27 @@ void compute_forces(vec *r, vec *a) {
 }
 
 
-void compute_forces_stat(vec *r, vec *a) {
-  for (int i = 0; i < npart; i++) {
+void compute_forces_stat(vec *r, vec *a, params p) {
+  vec rij;
+  float rij2, simforceij;
+  float penergy = 0.;
+  for (int i = 0; i < p.npart; i++) {
     a[i].x = 0.;
     a[i].y = 0.;
     a[i].z = 0.;
     }
-  for (int i = 0; i < npart; i++) { // calcolo forze
-    for (int j = i + 1; j < npart; j++) {
+  for (int i = 0; i < p.npart; i++) { // calcolo forze
+    for (int j = i + 1; j < p.npart; j++) {
       rij.x = (r[i].x - r[j].x);
       rij.y = (r[i].y - r[j].y);
       rij.z = (r[i].z - r[j].z);
-      rij.x = rij.x - BOXL*round(rij.x/BOXL);
-      rij.y = rij.y - BOXL*round(rij.y/BOXL);
-      rij.z = rij.z - BOXL*round(rij.z/BOXL);
+      rij.x = rij.x - p.BOXL*round(rij.x/p.BOXL);
+      rij.y = rij.y - p.BOXL*round(rij.y/p.BOXL);
+      rij.z = rij.z - p.BOXL*round(rij.z/p.BOXL);
       rij2 = rij.x*rij.x + rij.y*rij.y + rij.z*rij.z;
-      if (rij2 < r_max_squared) {
-        simforceij = simforce(rij2, eps, sigma);
-        penergy = penergy + (potenergy(rij2, eps, sigma) - shift);
+      if (rij2 < p.r_max_squared) {
+        simforceij = simforce(rij2, p.eps, p.sigma);
+        penergy = penergy + (potenergy(rij2, p.eps, p.sigma) - p.shift);
         a[i].x = a[i].x + simforceij * rij.x;
         a[i].y = a[i].y + simforceij * rij.y;
         a[i].z = a[i].z + simforceij * rij.z;
@@ -159,21 +180,21 @@ void compute_forces_stat(vec *r, vec *a) {
 }
 
 
-void eulero(vec *r, vec *ro, vec *a) {
+void eulero(vec *r, vec *ro, vec *a, params p) {
   vec vi, rni;
-  FILE *inputv = fopen(restartvelfilepath,"r");
-  for (int i = 0; i < npart; i++) {
+  FILE *inputv = fopen(p.restartvelfilepath,"r");
+  for (int i = 0; i < p.npart; i++) {
     fscanf(inputv, "%g %g %g\n", &(vi.x), &(vi.y), &(vi.z));
-    rni.x = r[i].x + vi.x * dt + 0.5 * dtsquare * a[i].x / m;
-    rni.y = r[i].y + vi.x * dt + 0.5 * dtsquare * a[i].y / m;
-    rni.z = r[i].z + vi.x * dt + 0.5 * dtsquare * a[i].z / m;
+    rni.x = r[i].x + vi.x * p.dt + 0.5 * p.dtsquare * a[i].x / p.m;
+    rni.y = r[i].y + vi.x * p.dt + 0.5 * p.dtsquare * a[i].y / p.m;
+    rni.z = r[i].z + vi.x * p.dt + 0.5 * p.dtsquare * a[i].z / p.m;
     // printf("EULERO %g %g %g\n",rni.x,rni.y,rni.z);
     ro[i].x = r[i].x;
     ro[i].y = r[i].y;
     ro[i].z = r[i].z;
-    r[i].x = rni.x - BOXL * round(rni.x/BOXL);
-    r[i].y = rni.y - BOXL * round(rni.y/BOXL);
-    r[i].z = rni.z - BOXL * round(rni.y/BOXL);
+    r[i].x = rni.x - p.BOXL * round(rni.x/p.BOXL);
+    r[i].y = rni.y - p.BOXL * round(rni.y/p.BOXL);
+    r[i].z = rni.z - p.BOXL * round(rni.y/p.BOXL);
   }
   fclose(inputv);
 }

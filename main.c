@@ -7,140 +7,133 @@
 #define CHECK_FILE(ptr, name) \
   if (!(ptr)) { perror("fopen " #name); exit(1); }
 
-
-
 int main(int argc, char *argv[]) {
+  params p;
+  int t;
   printf("Ciao dal corso, (non) sono Filippo. Chi sono?\n");
   printf("Hola senor Martino 💃💃💃💃💃💃💃!\n");
   // CHECK IF COMMAND LINE ARGUMENTS ARE PROVIDED
   if (argc < 2) {fprintf(stderr, "Usage: %s <input_file_path>\n", argv[0]); return -1;}
   // WRITE INPUT AND OUTPUT PATHS
-  snprintf(paramfilepath,        STRLEN, "%s/param.in",            argv[1]);
-  snprintf(logfilepath,          STRLEN, "%s/run.log",             argv[1]);
-  snprintf(statfilepath,         STRLEN, "%s/stat.dat",            argv[1]);
-  snprintf(coordfilepath,        STRLEN, "%s/verlet_periodic.xyz", argv[1]);
-  snprintf(restartcoordfilepath, STRLEN, "%s/in_cond.xyz",         argv[1]);
-  snprintf(restartvelfilepath,   STRLEN, "%s/in_cond_vel.dat",     argv[1]);
-  snprintf(restartvelfilepath,   STRLEN, "%s/in_cond_vel.dat",     argv[1]);
-  snprintf(totdurationfilepath,  STRLEN, "%s/tot_duration.dat",     argv[1]);
-  paramfile        = fopen(paramfilepath, "r");
-  logfile          = fopen(logfilepath, "w");
-  statfile         = fopen(statfilepath, "w");
-  coordfile        = fopen(coordfilepath, "w");
-  restartcoordfile = fopen(restartcoordfilepath, "w");
-  restartvelfile   = fopen(restartvelfilepath, "w");
-  totdurationfile  = fopen(totdurationfilepath, "w");
-  CHECK_FILE(paramfile,        paramfilepath);
-  CHECK_FILE(logfile,          logfilepath);
-  CHECK_FILE(statfile,         statfilepath);
-  CHECK_FILE(coordfile,        coordfilepath);
-  CHECK_FILE(restartcoordfile, restartcoordfilepath);
-  CHECK_FILE(restartvelfile,   restartvelfilepath);
-  CHECK_FILE(totdurationfile,  totdurationfilepath);
+  snprintf(p.paramfilepath,        STRLEN, "%s/param.in",            argv[1]);
+  snprintf(p.logfilepath,          STRLEN, "%s/run.log",             argv[1]);
+  snprintf(p.statfilepath,         STRLEN, "%s/stat.dat",            argv[1]);
+  snprintf(p.coordfilepath,        STRLEN, "%s/verlet_periodic.xyz", argv[1]);
+  snprintf(p.restartcoordfilepath, STRLEN, "%s/in_cond.xyz",         argv[1]);
+  snprintf(p.restartvelfilepath,   STRLEN, "%s/in_cond_vel.dat",     argv[1]);
+  snprintf(p.restartvelfilepath,   STRLEN, "%s/in_cond_vel.dat",     argv[1]);
+  p.paramfile        = fopen(p.paramfilepath, "r");
+  p.logfile          = fopen(p.logfilepath, "w");
+  p.statfile         = fopen(p.statfilepath, "w");
+  p.coordfile        = fopen(p.coordfilepath, "w");
+  p.restartcoordfile = fopen(p.restartcoordfilepath, "w");
+  p.restartvelfile   = fopen(p.restartvelfilepath, "w");
+  CHECK_FILE(p.paramfile,        p.paramfilepath);
+  CHECK_FILE(p.logfile,          p.logfilepath);
+  CHECK_FILE(p.statfile,         p.statfilepath);
+  CHECK_FILE(p.coordfile,        p.coordfilepath);
+  CHECK_FILE(p.restartcoordfile, p.restartcoordfilepath);
+  CHECK_FILE(p.restartvelfile,   p.restartvelfilepath);
   char vtkfilename[STRLEN];
 
   // READ PARAMETERS
-  fscanf(paramfile,"npartx=%i\nnparty=%i\nnlayers=%i\nnpart=%i\nwrite_jump=%i\ntimesteps=%i\ndt=%g\neps=%g\nsigma=%g\nmu=%g\nvar=%g\nm=%g\na_lattice=%g\npot_trunc_perc=%g\nnew_in_cond=%i\nreproducible=%i",&npartx,&nparty,&nlayers,&npart,&write_jump,&timesteps,&dt,&eps,&sigma,&mu,&var,&m,&a_lattice,&pot_trunc_perc,&newc,&reproducible);
-  fclose(paramfile);
+  fscanf(p.paramfile,"npartx=%i\nnparty=%i\nnlayers=%i\nnpart=%i\nwrite_jump=%i\ntimesteps=%i\ndt=%g\neps=%g\nsigma=%g\nmu=%g\nvar=%g\nm=%g\na_lattice=%g\npot_trunc_perc=%g\nnew_in_cond=%i\nreproducible=%i",&p.npartx,&p.nparty,&p.nlayers,&p.npart,&p.write_jump,&p.timesteps,&p.dt,&p.eps,&p.sigma,&p.mu,&p.var,&p.m,&p.a_lattice,&p.pot_trunc_perc,&p.newc,&p.reproducible);
+  fclose(p.paramfile);
   // INITIALIZE VARIABLES
-  dtdouble = 2.*dt;
-  dtsquare = pow(dt, 2.);
-  r_max = sigma * pow((1+sqrt( 1-16*pot_trunc_perc ))/( 2*pot_trunc_perc ), 1./6.);  /*r_max IS COMPUTED BASED ON pot_trunc_perc, i.e. when POTENTIAL REACHES pot_trunc_perc OF ITS MAX VALUE*/
-  r_max_squared = pow(r_max, 2.);
-  shift = potenergy(r_max, eps, sigma); // POTENTIAL SHIFT
-  BOXL = ( 0.5 + nlayers ) * a_lattice; // (0.5 + max(npartx,nparty,nlayers) * a_lattice IS THE LATTICE LENGHT IN EACH DIRECTION)
-  reduced_density = npart * sigma / pow(BOXL, 3.);
+  p.dtdouble = 2.*p.dt;
+  p.dtsquare = pow(p.dt, 2.);
+  p.r_max = p.sigma * pow((1+sqrt( 1-16*p.pot_trunc_perc ))/( 2*p.pot_trunc_perc ), 1./6.);  /*r_max IS COMPUTED BASED ON pot_trunc_perc, i.e. when POTENTIAL REACHES pot_trunc_perc OF ITS MAX VALUE*/
+  p.r_max_squared = pow(p.r_max, 2.);
+  p.shift = potenergy(p.r_max, p.eps, p.sigma); // POTENTIAL SHIFT
+  p.BOXL = ( 0.5 + p.nlayers ) * p.a_lattice; // (0.5 + max(npartx,nparty,nlayers) * a_lattice IS THE LATTICE LENGHT IN EACH DIRECTION)
+  p.reduced_density = p.npart * p.sigma / pow(p.BOXL, 3.);
 
-  if (newc==0) {printf("Restart simulation feature not available. Stoppingi\n"); return -1;}
-  printf("r_max=%g    BOXL=%g    red. dens=%g\n",r_max,BOXL,reduced_density);
-  nrun = 0;
-  last_durata_totale = 0.;
+  if (p.newc==0) {printf("Restart simulation feature not available. Stoppingi\n"); return -1;}
+  printf("r_max=%g    BOXL=%g    red. dens=%g\n",p.r_max,p.BOXL,p.reduced_density);
   printf("Initialize FCC lattice and random velocities.\n");
-  fprintf(logfile,"start new simulation:\n\nPARAM:\n");
-  fprintf(logfile,"npartx=%i\nnparty=%i\n",npartx,nparty);
-  fprintf(logfile,"nlayers=%i\nnpart=%i\n",nlayers,npart);
-  fprintf(logfile,"write_jump=%i\ntimesteps=%i\n",write_jump,timesteps);
-  fprintf(logfile,"dt=%g\neps=%g\nsigma=%g\n",dt,eps,sigma);
-  fprintf(logfile,"mu=%g\nvar=%g\nm=%g\na_lattice=%g\n",mu,var,m,a_lattice);
-  fprintf(logfile,"pot_trunc_perc=%g\nnew_in_cond=%i\n\n\n",pot_trunc_perc,newc);
-  fprintf(logfile,"reproducible=%i\n",reproducible);
-  fprintf(logfile,"Initialize FCC lattice and random velocities\n\n");
-  fprintf(logfile, "r_max=%g    BOXL=%g    red. dens=%g\n",r_max,BOXL,reduced_density);
-  set_initial_conditions();
+  fprintf(p.logfile,"start new simulation:\n\nPARAM:\n");
+  fprintf(p.logfile,"npartx=%i\nnparty=%i\n",p.npartx,p.nparty);
+  fprintf(p.logfile,"nlayers=%i\nnpart=%i\n",p.nlayers,p.npart);
+  fprintf(p.logfile,"write_jump=%i\ntimesteps=%i\n",p.write_jump,p.timesteps);
+  fprintf(p.logfile,"dt=%g\neps=%g\nsigma=%g\n",p.dt,p.eps,p.sigma);
+  fprintf(p.logfile,"mu=%g\nvar=%g\nm=%g\na_lattice=%g\n",p.mu,p.var,p.m,p.a_lattice);
+  fprintf(p.logfile,"pot_trunc_perc=%g\nnew_in_cond=%i\n\n\n",p.pot_trunc_perc,p.newc);
+  fprintf(p.logfile,"reproducible=%i\n",p.reproducible);
+  fprintf(p.logfile,"Initialize FCC lattice and random velocities\n\n");
+  fprintf(p.logfile, "r_max=%g    BOXL=%g    red. dens=%g\n",p.r_max,p.BOXL,p.reduced_density);
+  set_initial_conditions(p);
     
     
   // OPEN OUTPUT FILES AND WRITE HEADERS
-  fprintf(statfile,"# t(0)   sumvx(1)   sumvy(2)   sumvz(3)    kenergy(4)   penergy(5)   energy(6)   red_temp(7)\n");
+  fprintf(p.statfile,"# t(0)   sumvx(1)   sumvy(2)   sumvz(3)    kenergy(4)   penergy(5)   energy(6)   red_temp(7)\n");
     
   // DECLARE VARIABLES
-  vec r[npart], ro[npart], a[npart];
+  vec r[p.npart], ro[p.npart], a[p.npart];
   
   // LOAD INITIAL CONDITIONS
-  load_r(r);
-  write_r(coordfile, r);
+  load_r(r, p);
+  write_r(p.coordfile, r, p);
   printf("Integration started:\n\n");
-  fprintf(logfile, "Integration started: wait!\n\n");
-    for (int i = 0; i < npart; i++) {
+  fprintf(p.logfile, "Integration started: wait!\n\n");
+    for (int i = 0; i < p.npart; i++) {
         a[i].x = 0.0;
         a[i].y = 0.0;
         a[i].z = 0.0;
     }
-  compute_forces(r, a);
-  eulero(r, ro, a);
-  write_r(coordfile, r);
+  compute_forces(r, a, p);
+  eulero(r, ro, a, p);
+  write_r(p.coordfile, r, p);
 
   printf("Ciao dal corso");
   printf("from the past");
 
   // CHECK PARTICLES INSIDE BOX
   int out_count = 0;
-  for (int i = 0; i < npart; i++) {
-    if (r[i].x < -BOXL/2. || r[i].x > BOXL/2.) out_count += 1;
-    if (r[i].y < -BOXL/2. || r[i].y > BOXL/2.) out_count += 1;
-    if (r[i].z < -BOXL/2. || r[i].z > BOXL/2.) out_count += 1;
+  for (int i = 0; i < p.npart; i++) {
+    if (r[i].x < -p.BOXL/2. || r[i].x > p.BOXL/2.) out_count += 1;
+    if (r[i].y < -p.BOXL/2. || r[i].y > p.BOXL/2.) out_count += 1;
+    if (r[i].z < -p.BOXL/2. || r[i].z > p.BOXL/2.) out_count += 1;
   }
   if (out_count > 0) printf("initial conditions are not inside periodic box.\n");
 
 
   // VERLET INTEGRATION
   t = 2;
-  for (int tt = 2; tt < (timesteps-1) / write_jump; tt++) {
-    for (int k = 0; k < write_jump; k++) { // iteration without stats
+  for (int tt = 2; tt < (p.timesteps-1) / p.write_jump; tt++) {
+    for (int k = 0; k < p.write_jump; k++) { // iteration without stats
                                            // and write to file
-      clock_t start = clock();
-      compute_forces(r, a);
-      verlet_periodic(r, ro, a);
+      //clock_t start = clock();
+      compute_forces(r, a, p);
+      verlet_periodic(r, ro, a, p);
       t++;
-      clock_t end = clock();
-      double time_taken = ((double)(end - start)) / CLOCKS_PER_SEC;
-      printf("Iteration: %d, %.3f msec\n", k, time_taken*1000);
+      //clock_t end = clock();
+      //double time_taken = ((double)(end - start)) / CLOCKS_PER_SEC;
+      //printf("Iteration: %d, %.3f msec\n", k, time_taken*1000);
     }
     clock_t start = clock();
-    compute_forces_stat(r, a);
-    verlet_periodic_write(r, ro, a);
+    compute_forces_stat(r, a, p);
+    verlet_periodic_write(t, r, ro, a, p);
     snprintf(vtkfilename, STRLEN, "%s/particles_%08d.vtk", argv[1], tt);
-    writePointCloudToVTK(vtkfilename, r, npart);
+    writePointCloudToVTK(vtkfilename, r, p.npart);
     //writePointCloudToVTKBinary(vtkfilename, r, npart); // does not work
     t++;
     clock_t end = clock();
     double time_taken = ((double)(end - start)) / CLOCKS_PER_SEC;
-    printf("Write Iteration: %d, %.3f msec\n", tt, time_taken*1000);
+    printf("Write Iteration: tt %d t %d, %.3f msec\n", tt, t, time_taken*1000);
   }
   
   // LAST TIME STEP
-  compute_forces_stat(r, a);
-  verlet_periodic_last(r, ro, a); t++;
-  write_durata_totale();
+  compute_forces_stat(r, a, p);
+  verlet_periodic_last(t, r, ro, a, p); t++;
   
   // CLOSE FILES
-  fclose(coordfile);
-  fclose(restartcoordfile);
-  fclose(restartvelfile);
-  fclose(statfile);
+  fclose(p.coordfile);
+  fclose(p.restartcoordfile);
+  fclose(p.restartvelfile);
+  fclose(p.statfile);
   printf("Done!\n\n");
-  fprintf(logfile, "Done!\n\n\n\n\n\n\n\n");
-  fclose(logfile);
-  fclose(totdurationfile);
+  fprintf(p.logfile, "Done!\n\n\n\n\n\n\n\n");
+  fclose(p.logfile);
 }
 
 /*

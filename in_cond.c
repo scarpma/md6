@@ -15,48 +15,48 @@ float GaussianNoise(float mu, float var){
 }
 
 
-void set_initial_conditions(void) {
-  if (npart != 4*nlayers*npartx*nparty) {
-    printf("** PROBLEMA **\nnpart non congruente!\n");
-    fprintf(logfile,"** PROBLEMA **\nnpart non congruente!\n");
+void set_initial_conditions(params p) {
+  if (p.npart != 4*p.nlayers*p.npartx*p.nparty) {
+    printf("** PROBLEMA **\np.npart non congruente!\n");
+    fprintf(p.logfile,"** PROBLEMA **\np.npart non congruente!\n");
   }
   vec r, v0; // giochetto velocità opposte a coppie (mom angolare e mom lineare circa nulli)
   float vxm = 0., vym = 0., vzm = 0.;
   char AtomName[] = "atomX";
-  float semi_lattice_len_x =  npartx*a_lattice/2.; // (0.5 + max(npartx-1,nparty-1,nlayers-1) * a_lattice è la lunghezza  del reticolo nella direzione che la rende massima)
-  float semi_lattice_len_y =  nparty*a_lattice/2.;
-  float semi_lattice_len_z = nlayers*a_lattice/2.;
+  float semi_lattice_len_x =  p.npartx*p.a_lattice/2.; // (0.5 + max(p.npartx-1,p.nparty-1,p.nlayers-1) * p.a_lattice è la lunghezza  del reticolo nella direzione che la rende massima)
+  float semi_lattice_len_y =  p.nparty*p.a_lattice/2.;
+  float semi_lattice_len_z = p.nlayers*p.a_lattice/2.;
   
-  FILE *cond_in = fopen(restartcoordfilepath,"w");
+  FILE *cond_in = fopen(p.restartcoordfilepath,"w");
   if (!cond_in) {
     perror("fopen cond_in");
     exit(1);
   }
-  FILE *cond_in_vel = fopen(restartvelfilepath,"w");
+  FILE *cond_in_vel = fopen(p.restartvelfilepath,"w");
   if (!cond_in_vel) {
     perror("fopen cond_in_vel");
     exit(1);
   }
 
-  fprintf(cond_in,"%i\n\n",npart);
+  fprintf(cond_in,"%i\n\n",p.npart);
 
   /**** To create FCC 100 lattice*********/
-  for(int i = 0; i < npartx; i++){            // Number of Atoms in the X direction
+  for(int i = 0; i < p.npartx; i++){            // Number of Atoms in the X direction
 
-    for(int j = 0; j < nparty; j++){        // Number of Atoms in the Y direction
+    for(int j = 0; j < p.nparty; j++){        // Number of Atoms in the Y direction
 
-      for(int k = 0; k < nlayers; k++) {       // Number of layers in the Z direction
+      for(int k = 0; k < p.nlayers; k++) {       // Number of layers in the Z direction
 
-        r.x = i * a_lattice - semi_lattice_len_x;   r.y = j * a_lattice - semi_lattice_len_y;   r.z = k * a_lattice - semi_lattice_len_z;
+        r.x = i * p.a_lattice - semi_lattice_len_x;   r.y = j * p.a_lattice - semi_lattice_len_y;   r.z = k * p.a_lattice - semi_lattice_len_z;
         fprintf(cond_in,"%s %lf %lf %lf\n", AtomName, r.x, r.y, r.z);
 
-        r.x = i * a_lattice - semi_lattice_len_x;   r.y = 0.5 * a_lattice +  j * a_lattice - semi_lattice_len_y;    r.z = 0.5 * a_lattice + k * a_lattice - semi_lattice_len_z;
+        r.x = i * p.a_lattice - semi_lattice_len_x;   r.y = 0.5 * p.a_lattice +  j * p.a_lattice - semi_lattice_len_y;    r.z = 0.5 * p.a_lattice + k * p.a_lattice - semi_lattice_len_z;
         fprintf(cond_in,"%s %lf %lf %lf\n", AtomName, r.x, r.y, r.z);
 
-        r.x = 0.5 * a_lattice + i * a_lattice - semi_lattice_len_x;  r.y = j * a_lattice - semi_lattice_len_y;   r.z = 0.5 * a_lattice + k *a_lattice - semi_lattice_len_z;
+        r.x = 0.5 * p.a_lattice + i * p.a_lattice - semi_lattice_len_x;  r.y = j * p.a_lattice - semi_lattice_len_y;   r.z = 0.5 * p.a_lattice + k *p.a_lattice - semi_lattice_len_z;
         fprintf(cond_in,"%s %lf %lf %lf\n", AtomName, r.x, r.y, r.z);
 
-        r.x = 0.5 * a_lattice + i*a_lattice - semi_lattice_len_x;  r.y = 0.5 * a_lattice + j * a_lattice - semi_lattice_len_y;   r.z = k * a_lattice - semi_lattice_len_z;
+        r.x = 0.5 * p.a_lattice + i*p.a_lattice - semi_lattice_len_x;  r.y = 0.5 * p.a_lattice + j * p.a_lattice - semi_lattice_len_y;   r.z = k * p.a_lattice - semi_lattice_len_z;
         fprintf(cond_in,"%s %lf %lf %lf\n", AtomName, r.x, r.y, r.z);
       }
 
@@ -64,15 +64,15 @@ void set_initial_conditions(void) {
 
   }
 
-  if (reproducible) {
+  if (p.reproducible) {
     srand(0);
   } else {
     srand(time(NULL));
     }
-  for (int i = 0; i < npart / 2; i++) { // npart / 2 perchè per annullare il momento e il momento angolare totale metto le velocità opposte a coppie
-    v0.x = GaussianNoise(mu, var);
-    v0.y = GaussianNoise(mu, var);
-    v0.z = GaussianNoise(mu, var);
+  for (int i = 0; i < p.npart / 2; i++) { // p.npart / 2 perchè per annullare il momento e il momento angolare totale metto le velocità opposte a coppie
+    v0.x = GaussianNoise(p.mu, p.var);
+    v0.y = GaussianNoise(p.mu, p.var);
+    v0.z = GaussianNoise(p.mu, p.var);
     fprintf(cond_in_vel,"%g %g %g\n",v0.x,v0.y,v0.z); // giochetto velocità opposte a coppie
     fprintf(cond_in_vel,"%g %g %g\n",-v0.x,-v0.y,-v0.z);
   }
@@ -81,10 +81,11 @@ void set_initial_conditions(void) {
 }
 
 
-void load_r(vec *r) {
-  FILE *inputr = fopen(restartcoordfilepath,"r");
-  fscanf(inputr,"%i\n\n",&garb);
-  for (int i = 0; i < npart; i++) {
+void load_r(vec *r, params p) {
+  FILE *inputr = fopen(p.restartcoordfilepath,"r");
+  char garb[STRLEN];
+  fscanf(inputr,"%s\n\n",garb);
+  for (int i = 0; i < p.npart; i++) {
     fscanf(inputr,"atomX %g %g %g\n", &(r[i].x), &(r[i].y), &(r[i].z));
         //printf("%g %g %g",r[i].x,r[i].y,r[i].z);
   }
@@ -92,36 +93,32 @@ void load_r(vec *r) {
 }
 
 
-void load_r_2(FILE *inputhere, vec *r) {
-  fscanf(inputhere,"%i\n\n",&garb);
-  for (int i = 0; i < npart; i++) {
+void load_r_2(FILE *inputhere, vec *r, params p) {
+  char garb[STRLEN];
+  fscanf(inputhere,"%s\n\n",garb);
+  for (int i = 0; i < p.npart; i++) {
     fscanf(inputhere,"atomX %g %g %g\n", &(r[i].x), &(r[i].y), &(r[i].z));
   }
 }
 
 
-void write_stat(void) {
-  kenergy = kenergy * 0.5 * m;
-  reduced_temperature = 2. * kenergy / ((npart - 3.) * eps);
-  fprintf(statfile,"%g %g %g %g %g %g %g %g\n", t*dt + last_durata_totale, sumv.x, sumv.y, sumv.z, kenergy, penergy, kenergy + penergy, reduced_temperature);
+void write_stat(float t, vec sumv, float kenergy, float penergy, params p) {
+  kenergy = kenergy * 0.5 * p.m;
+  float reduced_temperature = 2. * kenergy / ((p.npart - 3.) * p.eps);
+  fprintf(p.statfile,"%g %g %g %g %g %g %g %g\n", t*p.dt, sumv.x, sumv.y, sumv.z, kenergy, penergy, kenergy + penergy, reduced_temperature);
 }
 
 
 // Invio-numero particelle- invio (faccio capire che non si tratta di altre particelle,
 // ma ho solo scalato lo step temporale)
-void write_r(FILE *output_file, vec *r) {
-  fprintf(output_file, "%i\n\n", npart);
-  for (int i = 0; i < npart; i++) {
+void write_r(FILE *output_file, vec *r, params p) {
+  fprintf(output_file, "%i\n\n", p.npart);
+  for (int i = 0; i < p.npart; i++) {
     fprintf(output_file, "atomX %g %g %g\n", r[i].x, r[i].y, r[i].z);
   }
 }
 
 
-void write_vi(FILE *output_file) {
+void write_vi(FILE *output_file, vec vi) {
   fprintf(output_file, "%g %g %g\n", vi.x, vi.y, vi.z);
-}
-
-
-void write_durata_totale(void) {
-  fprintf(totdurationfile,"%g\n%i\n",t*dt + last_durata_totale, nrun);
 }

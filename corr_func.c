@@ -7,6 +7,30 @@
 #define CHECK_FILE(ptr, name) \
   if (!(ptr)) { perror("fopen " #name); exit(1); }
 
+int reproducible = 0;
+int t=0, npartx=0, nparty=0, nlayers=0;
+int npart=0, write_jump=0, timesteps=0, newc=0, nrun=0, garb=0;
+float dt=0., dtsquare=0., dtdouble=0., eps=0., sigma=0., mu=0.;
+float var=0., m=0., a_lattice=0., last_durata_totale=0.;
+float r_max=0., pot_trunc_perc=0., BOXL=0., r_max_squared=0.;
+float shift=0., penergy=0., rij2=0.;
+float kenergy=0., simforceij=0., reduced_temperature=0., reduced_density=0.;
+vec rij, sumv, vi, rni;
+char paramfilepath[STRLEN], logfilepath[STRLEN];
+char statfilepath[STRLEN];
+char coordfilepath[STRLEN], restartcoordfilepath[STRLEN];
+char restartvelfilepath[STRLEN], autodiffusionfilepath[STRLEN];
+char totdurationfilepath[STRLEN], corrfuncfilepath[STRLEN];
+FILE *paramfile;
+FILE *logfile;
+FILE *statfile;
+FILE *coordfile;
+FILE *restartcoordfile;
+FILE *restartvelfile;
+FILE *totdurationfile;
+FILE *autodiffusionfile;
+FILE *corrfuncfile;
+
 int main(int argc, char *argv[]) {
   // CHECK IF COMMAND LINE ARGUMENTS ARE PROVIDED
   if (argc < 2) {fprintf(stderr, "Usage: %s <input_file_path>\n", argv[0]); return -1;}
