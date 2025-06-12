@@ -86,6 +86,7 @@ int main(int argc, char *argv[]) {
   write_r(coordfile, r);
 
   printf("Ciao dal corso");
+  printf("from the past");
 
   // CHECK PARTICLES INSIDE BOX
   int out_count = 0;
