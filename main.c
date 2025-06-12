@@ -7,7 +7,7 @@
 #define CHECK_FILE(ptr, name) \
   if (!(ptr)) { perror("fopen " #name); exit(1); }
 
-print("Hola senor Martino!")
+print("Hola senor Martino 💃💃💃💃💃💃💃!")
 
 
 int main(int argc, char *argv[]) {
