@@ -3,6 +3,25 @@
 #include <math.h>
 #include "defs.h"
 
+// Define variables once and for all
+int reproducible;
+int t, npartx, nparty, nlayers, npart, write_jump, timesteps, newc, nrun, garb;
+float dt, dtsquare, dtdouble, eps, sigma, mu, var, m, a_lattice, last_durata_totale;
+float r_max, pot_trunc_perc, BOXL, r_max_squared, shift, penergy, rij2;
+float kenergy, simforceij, reduced_temperature, reduced_density;
+
+char paramfilepath[STRLEN], logfilepath[STRLEN];
+char statfilepath[STRLEN];
+char coordfilepath[STRLEN], restartcoordfilepath[STRLEN];
+char restartvelfilepath[STRLEN], autodiffusionfilepath[STRLEN];
+char totdurationfilepath[STRLEN], corrfuncfilepath[STRLEN];
+
+FILE *paramfile, *logfile, *statfile;
+FILE *coordfile, *restartcoordfile, *restartvelfile;
+FILE *totdurationfile, *autodiffusionfile;
+FILE *corrfuncfile;
+
+vec rij, sumv, vi, rni;
 
 #define CHECK_FILE(ptr, name) \
   if (!(ptr)) { perror("fopen " #name); exit(1); }
