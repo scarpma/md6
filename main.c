@@ -85,6 +85,7 @@ int main(int argc, char *argv[]) {
   eulero(r, ro, a);
   write_r(coordfile, r);
 
+  printf("Ciao dal corso");
 
   // CHECK PARTICLES INSIDE BOX
   int out_count = 0;
