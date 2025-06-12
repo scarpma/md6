@@ -11,7 +11,7 @@ print("Hola senor Martino 💃💃💃💃💃💃💃!")
 
 
 int main(int argc, char *argv[]) {
-  printf("Ciao dal corso, (non) sono Filippo. Chi sono?")
+  printf("Ciao dal corso, (non) sono Filippo. Chi sono?\n";)
   // CHECK IF COMMAND LINE ARGUMENTS ARE PROVIDED
   if (argc < 2) {fprintf(stderr, "Usage: %s <input_file_path>\n", argv[0]); return -1;}
   // WRITE INPUT AND OUTPUT PATHS
