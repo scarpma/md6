@@ -73,17 +73,13 @@ int main(int argc, char *argv[]) {
   
   // LOAD INITIAL CONDITIONS
   load_r(r, p);
-  write_r(p.coordfile, r, p);
   printf("Integration started:\n\n");
   fprintf(p.logfile, "Integration started: wait!\n\n");
-    for (int i = 0; i < p.npart; i++) {
-        a[i].x = 0.0;
-        a[i].y = 0.0;
-        a[i].z = 0.0;
-    }
-  compute_forces(r, a, p);
-  eulero(r, ro, a, p);
-  write_r(p.coordfile, r, p);
+  for (int i = 0; i < p.npart; i++) {
+      a[i].x = 0.0;
+      a[i].y = 0.0;
+      a[i].z = 0.0;
+  }
 
   printf("Ciao dal corso");
   printf("from the past");
@@ -99,33 +95,55 @@ int main(int argc, char *argv[]) {
 
 
   // VERLET INTEGRATION
-  t = 2;
-  for (int tt = 2; tt < (p.timesteps-1) / p.write_jump; tt++) {
-    for (int k = 0; k < p.write_jump; k++) { // iteration without stats
-                                           // and write to file
-      //clock_t start = clock();
-      compute_forces(r, a, p);
-      verlet_periodic(r, ro, a, p);
-      t++;
-      //clock_t end = clock();
-      //double time_taken = ((double)(end - start)) / CLOCKS_PER_SEC;
-      //printf("Iteration: %d, %.3f msec\n", k, time_taken*1000);
+  clock_t start, end;
+  t = 0;
+  while (t < p.timesteps) {
+    if (t%p.write_jump==0) {
+      start = clock();
+      snprintf(vtkfilename, STRLEN, "%s/particles_%08d.vtk", argv[1], t);
+      //writePointCloudToVTKBinary(vtkfilename, r, npart); // does not work
+      writePointCloudToVTK(vtkfilename, r, p.npart);
     }
-    clock_t start = clock();
-    penergy = compute_forces_stat(r, a, p);
-    verlet_periodic_write(t, r, ro, a, penergy, p);
-    snprintf(vtkfilename, STRLEN, "%s/particles_%08d.vtk", argv[1], tt);
-    writePointCloudToVTK(vtkfilename, r, p.npart);
-    //writePointCloudToVTKBinary(vtkfilename, r, npart); // does not work
+
+
+    // =========================== //
+    // POTENTIAL ENERGY AND FORCES //
+    // =========================== //
+    if (t%p.write_jump==0) {
+      penergy = compute_forces_stat(r, a, p);
+    } else {
+      compute_forces(r, a, p);
+    }
+
+
+    // =========================== //
+    // KINETIC ENERGY AND MOMENTUM //
+    // =========================== //
+    
+    if (t%p.write_jump==0) {
+      compute_kenergy_momentum(t, r, ro, a, penergy, p);
+    }
+
+
+    // =========================== //
+    // NEWTON MECHANICS TIMESTEP   //
+    // =========================== //
+    if (t==0) {
+      eulero(r, ro, a, p);
+    } else {
+      verlet_periodic(r, ro, a, p);
+    }
+
+
+    if (t%p.write_jump==0) {
+      end = clock();
+      double time_taken = ((double)(end - start)) / CLOCKS_PER_SEC;
+      printf("Iteration: %d, %.3f msec\n", t, time_taken*1000);
+    }
+
+
     t++;
-    clock_t end = clock();
-    double time_taken = ((double)(end - start)) / CLOCKS_PER_SEC;
-    printf("Write Iteration: tt %d t %d, %.3f msec\n", tt, t, time_taken*1000);
   }
-  
-  // LAST TIME STEP
-  penergy = compute_forces_stat(r, a, p);
-  verlet_periodic_last(t, r, ro, a, penergy, p); t++;
   
   // CLOSE FILES
   fclose(p.coordfile);

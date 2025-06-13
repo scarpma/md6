@@ -40,71 +40,23 @@ void verlet_periodic(vec *r, vec *ro, vec *a, params p) {
   }
 }
 
-// VERLET CON CALCOLO MOMENTO ED ENERGIA TOTALE
-void verlet_periodic_write(float t, vec *r, vec *ro, vec *a, float penergy, params p) {
-  vec rni, vi, sumv;
+
+void compute_kenergy_momentum(float t, vec *r, vec *ro, vec *a, float penergy, params p) {
+  vec vi, sumv;
   float kenergy;
   sumv.x = 0.;
   sumv.y = 0.;
   sumv.z = 0.;
   kenergy = 0.;
   for (int i = 0; i < p.npart; i++) {
-    rni.x = 2.0 * r[i].x - ro[i].x + p.dtsquare * a[i].x / p.m;
-    rni.y = 2.0 * r[i].y - ro[i].y + p.dtsquare * a[i].y / p.m;
-    rni.z = 2.0 * r[i].z - ro[i].z + p.dtsquare * a[i].z / p.m;
-    vi.x = (rni.x-ro[i].x-p.BOXL * round((rni.x-ro[i].x)/p.BOXL))/p.dtdouble; // faccio anche qui round per togliere velocità da un lato del box all'altro.
-    vi.y = (rni.y-ro[i].y-p.BOXL * round((rni.y-ro[i].y)/p.BOXL))/p.dtdouble;
-    vi.z = (rni.z-ro[i].z-p.BOXL * round((rni.z-ro[i].z)/p.BOXL))/p.dtdouble;
-    ro[i].x = r[i].x;
-    ro[i].y = r[i].y;
-    ro[i].z = r[i].z;
-    r[i].x = rni.x - p.BOXL * round( rni.x / p.BOXL );
-    r[i].y = rni.y - p.BOXL * round( rni.y / p.BOXL );
-    r[i].z = rni.z - p.BOXL * round( rni.z / p.BOXL );
+    vi.x = (r[i].x-ro[i].x-p.BOXL * round((r[i].x-ro[i].x)/p.BOXL))/p.dt; // faccio anche qui round per togliere velocità da un lato del box all'altro.
+    vi.y = (r[i].y-ro[i].y-p.BOXL * round((r[i].y-ro[i].y)/p.BOXL))/p.dt;
+    vi.z = (r[i].z-ro[i].z-p.BOXL * round((r[i].z-ro[i].z)/p.BOXL))/p.dt;
     sumv.x += vi.x;
     sumv.y += vi.y;
     sumv.z += vi.z;
     kenergy += vi.x*vi.x + vi.y*vi.y + vi.z*vi.z;
-    }
-  write_r(p.coordfile, r, p);
-  write_stat(t, sumv, kenergy, penergy, p);
-  // TODO remove this
-  sumv.x = 0.0;
-  sumv.y = 0.0;
-  sumv.z = 0.0;
-  penergy = 0.0;
-  kenergy = 0.0;
-}
-
-
-void verlet_periodic_last(float t, vec *r, vec *ro, vec *a, float penergy, params p) {
-  vec rni, vi, sumv;
-  float kenergy;
-  sumv.x = 0.;
-  sumv.y = 0.;
-  sumv.z = 0.;
-  kenergy = 0.;
-  for (int i = 0; i < p.npart; i++) {
-    rni.x = 2.0 * r[i].x - ro[i].x + p.dtsquare * a[i].x / p.m;
-    rni.y = 2.0 * r[i].y - ro[i].y + p.dtsquare * a[i].y / p.m;
-    rni.z = 2.0 * r[i].z - ro[i].z + p.dtsquare * a[i].z / p.m;
-    vi.x = (rni.x-ro[i].x-p.BOXL * round((rni.x-ro[i].x)/p.BOXL))/p.dtdouble; // faccio anche qui round per togliere velocità da un lato del box all'altro.
-    vi.y = (rni.y-ro[i].y-p.BOXL * round((rni.y-ro[i].y)/p.BOXL))/p.dtdouble;
-    vi.z = (rni.z-ro[i].z-p.BOXL * round((rni.z-ro[i].z)/p.BOXL))/p.dtdouble;
-    ro[i].x = r[i].x;
-    ro[i].y = r[i].y;
-    ro[i].z = r[i].z;
-    r[i].x = rni.x - p.BOXL * round( rni.x / p.BOXL );
-    r[i].y = rni.y - p.BOXL * round( rni.y / p.BOXL );
-    r[i].z = rni.z - p.BOXL * round( rni.z / p.BOXL );
-    sumv.x += vi.x;
-    sumv.y += vi.y;
-    sumv.z += vi.z;
-    kenergy += vi.x*vi.x + vi.y*vi.y + vi.z*vi.z;
-    write_vi(p.restartvelfile, vi);
   }
-  write_r(p.coordfile, r, p);
-  write_r(p.restartcoordfile, r, p);
   write_stat(t, sumv, kenergy, penergy, p);
 }
 
