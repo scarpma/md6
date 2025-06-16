@@ -148,15 +148,12 @@ float compute_forces_stat(vec *r, vec *a, params p) {
 }
 
 
-void eulero(vec *r, vec *ro, vec *a, params p) {
-  vec vi, rni;
-  FILE *inputv = fopen(p.restartvelfilepath,"r");
+void eulero(vec *r, vec *ro, vec *v, vec *a, params p) {
+  vec rni;
   for (int i = 0; i < p.npart; i++) {
-    fscanf(inputv, "%g %g %g\n", &(vi.x), &(vi.y), &(vi.z));
-    rni.x = r[i].x + vi.x * p.dt + 0.5 * p.dtsquare * a[i].x / p.m;
-    rni.y = r[i].y + vi.x * p.dt + 0.5 * p.dtsquare * a[i].y / p.m;
-    rni.z = r[i].z + vi.x * p.dt + 0.5 * p.dtsquare * a[i].z / p.m;
-    // printf("EULERO %g %g %g\n",rni.x,rni.y,rni.z);
+    rni.x = r[i].x + v[i].x * p.dt + 0.5 * p.dtsquare * a[i].x / p.m;
+    rni.y = r[i].y + v[i].x * p.dt + 0.5 * p.dtsquare * a[i].y / p.m;
+    rni.z = r[i].z + v[i].x * p.dt + 0.5 * p.dtsquare * a[i].z / p.m;
     ro[i].x = r[i].x;
     ro[i].y = r[i].y;
     ro[i].z = r[i].z;
@@ -164,5 +161,4 @@ void eulero(vec *r, vec *ro, vec *a, params p) {
     r[i].y = rni.y - p.BOXL * round(rni.y/p.BOXL);
     r[i].z = rni.z - p.BOXL * round(rni.y/p.BOXL);
   }
-  fclose(inputv);
 }

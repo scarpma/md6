@@ -134,7 +134,7 @@ int main(int argc, char *argv[]) {
     // NEWTON MECHANICS TIMESTEP   //
     // =========================== //
     if (t==0) {
-      eulero(r, ro, a, p);
+      eulero(r, ro, v, a, p);
     } else {
       verlet_periodic(r, ro, a, p);
     }

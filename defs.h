@@ -73,7 +73,7 @@ void compute_kenergy_momentum(float t, vec *r, vec *ro, vec *a, float penergy, p
 void compute_kenergy_momentum2(float t, vec *r, vec *v, float penergy, params p);
 void compute_forces(vec *r, vec *a, params p);
 float compute_forces_stat(vec *r, vec *a, params p);
-void eulero(vec *r, vec *ro, vec *a, params p);
+void eulero(vec *r, vec *ro, vec *v, vec *a, params p);
 void writePointCloudToVTK(const char *filename, const vec *points, int numPoints);
 void writePointCloudToVTKBinary(const char *filename, const vec *points, int numPoints);
 
