@@ -69,10 +69,11 @@ int main(int argc, char *argv[]) {
   fprintf(p.statfile,"# t(0)   sumvx(1)   sumvy(2)   sumvz(3)    kenergy(4)   penergy(5)   energy(6)   red_temp(7)\n");
     
   // DECLARE VARIABLES
-  vec r[p.npart], ro[p.npart], a[p.npart];
+  vec r[p.npart], ro[p.npart], a[p.npart], v[p.npart];
   
   // LOAD INITIAL CONDITIONS
   load_r(r, p);
+  load_v(v, p);
   printf("Integration started:\n\n");
   fprintf(p.logfile, "Integration started: wait!\n\n");
   for (int i = 0; i < p.npart; i++) {
@@ -121,7 +122,11 @@ int main(int argc, char *argv[]) {
     // =========================== //
     
     if (t%p.write_jump==0) {
-      compute_kenergy_momentum(t, r, ro, a, penergy, p);
+      if (t==0) {
+        compute_kenergy_momentum2(t, r, v, penergy, p);
+      } else {
+        compute_kenergy_momentum(t, r, ro, a, penergy, p);
+      }
     }
 
 

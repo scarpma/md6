@@ -61,6 +61,23 @@ void compute_kenergy_momentum(float t, vec *r, vec *ro, vec *a, float penergy, p
 }
 
 
+void compute_kenergy_momentum2(float t, vec *r, vec *v, float penergy, params p) {
+  vec sumv;
+  float kenergy;
+  sumv.x = 0.;
+  sumv.y = 0.;
+  sumv.z = 0.;
+  kenergy = 0.;
+  for (int i = 0; i < p.npart; i++) {
+    sumv.x += v[i].x;
+    sumv.y += v[i].y;
+    sumv.z += v[i].z;
+    kenergy += v[i].x*v[i].x + v[i].y*v[i].y + v[i].z*v[i].z;
+  }
+  write_stat(t, sumv, kenergy, penergy, p);
+}
+
+
 void compute_forces(vec *r, vec *a, params p) {
   vec rij;
   float rij2, simforceij;

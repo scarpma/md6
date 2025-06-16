@@ -73,11 +73,20 @@ void set_initial_conditions(params p) {
     v0.x = GaussianNoise(p.mu, p.var);
     v0.y = GaussianNoise(p.mu, p.var);
     v0.z = GaussianNoise(p.mu, p.var);
-    fprintf(cond_in_vel,"%g %g %g\n",v0.x,v0.y,v0.z); // giochetto velocità opposte a coppie
+    fprintf(cond_in_vel,"%g %g %g\n", v0.x, v0.y, v0.z); // giochetto velocità opposte a coppie
     fprintf(cond_in_vel,"%g %g %g\n",-v0.x,-v0.y,-v0.z);
   }
   fclose(cond_in);
   fclose(cond_in_vel);
+}
+
+
+void load_v(vec *r, params p) {
+  FILE *inputr = fopen(p.restartvelfilepath,"r");
+  for (int i = 0; i < p.npart; i++) {
+    fscanf(inputr,"%g %g %g\n", &(r[i].x), &(r[i].y), &(r[i].z));
+  }
+  fclose(inputr);
 }
 
 
