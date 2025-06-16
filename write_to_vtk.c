@@ -1,6 +1,6 @@
 #include "defs.h"
 
-void writePointCloudToVTK(const char *filename, const vec *points, int numPoints) {
+void writePointCloudToVTK(const char *filename, const vec *points, const vec *velocity, int numPoints) {
     FILE *fp = NULL;
 
     // Open the file for writing
@@ -32,6 +32,19 @@ void writePointCloudToVTK(const char *filename, const vec *points, int numPoints
     // for (int i = 0; i < numPoints; i++) {
     //     fprintf(fp, "1 %d\n", i); // '1' indicates one point in this vertex, 'i' is the index of the point
     // }
+
+    // --- POINT_DATA Section for Velocity ---
+    fprintf(fp, "POINT_DATA %d\n", numPoints); // Point data section for the number of points
+
+    // Add velocity data as an additional scalar field
+    fprintf(fp, "SCALARS vel float 3\n"); // 3 components (x, y, z) for each velocity
+    fprintf(fp, "LOOKUP_TABLE default\n"); // Lookup table name (default is fine)
+
+    // Write the velocity data for each point (3 floats for each velocity)
+    for (int i = 0; i < numPoints; i++) {
+      fprintf(fp, "%f %f %f\n", velocity[i].x, velocity[i].y, velocity[i].z);
+    }
+
 
     // Close the file
     fclose(fp);

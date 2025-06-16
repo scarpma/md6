@@ -41,21 +41,21 @@ void verlet_periodic(vec *r, vec *ro, vec *a, params p) {
 }
 
 
-void compute_kenergy_momentum(float t, vec *r, vec *ro, vec *a, float penergy, params p) {
-  vec vi, sumv;
+void compute_kenergy_momentum(float t, vec *r, vec *ro, vec *v, float penergy, params p) {
+  vec sumv;
   float kenergy;
   sumv.x = 0.;
   sumv.y = 0.;
   sumv.z = 0.;
   kenergy = 0.;
   for (int i = 0; i < p.npart; i++) {
-    vi.x = (r[i].x-ro[i].x-p.BOXL * round((r[i].x-ro[i].x)/p.BOXL))/p.dt; // faccio anche qui round per togliere velocità da un lato del box all'altro.
-    vi.y = (r[i].y-ro[i].y-p.BOXL * round((r[i].y-ro[i].y)/p.BOXL))/p.dt;
-    vi.z = (r[i].z-ro[i].z-p.BOXL * round((r[i].z-ro[i].z)/p.BOXL))/p.dt;
-    sumv.x += vi.x;
-    sumv.y += vi.y;
-    sumv.z += vi.z;
-    kenergy += vi.x*vi.x + vi.y*vi.y + vi.z*vi.z;
+    v[i].x = (r[i].x-ro[i].x-p.BOXL * round((r[i].x-ro[i].x)/p.BOXL))/p.dt; // faccio anche qui round per togliere velocità da un lato del box all'altro.
+    v[i].y = (r[i].y-ro[i].y-p.BOXL * round((r[i].y-ro[i].y)/p.BOXL))/p.dt;
+    v[i].z = (r[i].z-ro[i].z-p.BOXL * round((r[i].z-ro[i].z)/p.BOXL))/p.dt;
+    sumv.x += v[i].x;
+    sumv.y += v[i].y;
+    sumv.z += v[i].z;
+    kenergy += v[i].x*v[i].x + v[i].y*v[i].y + v[i].z*v[i].z;
   }
   write_stat(t, sumv, kenergy, penergy, p);
 }

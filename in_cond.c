@@ -15,53 +15,41 @@ float GaussianNoise(float mu, float var){
 }
 
 
-void set_initial_conditions(params p) {
+void set_initial_conditions(vec *r, vec *v, params p) {
   if (p.npart != 4*p.nlayers*p.npartx*p.nparty) {
     printf("** PROBLEMA **\np.npart non congruente!\n");
     fprintf(p.logfile,"** PROBLEMA **\np.npart non congruente!\n");
   }
-  vec r, v0; // giochetto velocità opposte a coppie (mom angolare e mom lineare circa nulli)
-  float vxm = 0., vym = 0., vzm = 0.;
-  char AtomName[] = "atomX";
   float semi_lattice_len_x =  p.npartx*p.a_lattice/2.; // (0.5 + max(p.npartx-1,p.nparty-1,p.nlayers-1) * p.a_lattice è la lunghezza  del reticolo nella direzione che la rende massima)
   float semi_lattice_len_y =  p.nparty*p.a_lattice/2.;
   float semi_lattice_len_z = p.nlayers*p.a_lattice/2.;
   
-  FILE *cond_in = fopen(p.restartcoordfilepath,"w");
-  if (!cond_in) {
-    perror("fopen cond_in");
-    exit(1);
-  }
-  FILE *cond_in_vel = fopen(p.restartvelfilepath,"w");
-  if (!cond_in_vel) {
-    perror("fopen cond_in_vel");
-    exit(1);
-  }
-
-  fprintf(cond_in,"%i\n\n",p.npart);
-
   /**** To create FCC 100 lattice*********/
-  for(int i = 0; i < p.npartx; i++){            // Number of Atoms in the X direction
+  int n = 0;
+  for(int i = 0; i < p.npartx; i++){
+    for(int j = 0; j < p.nparty; j++){
+      for(int k = 0; k < p.nlayers; k++) { // Number of atoms in the Z direction
+        r[n].x = i * p.a_lattice - semi_lattice_len_x;
+        r[n].y = j * p.a_lattice - semi_lattice_len_y;
+        r[n].z = k * p.a_lattice - semi_lattice_len_z;
+        n++;
 
-    for(int j = 0; j < p.nparty; j++){        // Number of Atoms in the Y direction
+        r[n].x = i * p.a_lattice - semi_lattice_len_x;
+        r[n].y = 0.5 * p.a_lattice +  j * p.a_lattice - semi_lattice_len_y;
+        r[n].z = 0.5 * p.a_lattice + k * p.a_lattice - semi_lattice_len_z;
+        n++;
 
-      for(int k = 0; k < p.nlayers; k++) {       // Number of layers in the Z direction
+        r[n].x = 0.5 * p.a_lattice + i * p.a_lattice - semi_lattice_len_x;
+        r[n].y = j * p.a_lattice - semi_lattice_len_y;
+        r[n].z = 0.5 * p.a_lattice + k *p.a_lattice - semi_lattice_len_z;
+        n++;
 
-        r.x = i * p.a_lattice - semi_lattice_len_x;   r.y = j * p.a_lattice - semi_lattice_len_y;   r.z = k * p.a_lattice - semi_lattice_len_z;
-        fprintf(cond_in,"%s %lf %lf %lf\n", AtomName, r.x, r.y, r.z);
-
-        r.x = i * p.a_lattice - semi_lattice_len_x;   r.y = 0.5 * p.a_lattice +  j * p.a_lattice - semi_lattice_len_y;    r.z = 0.5 * p.a_lattice + k * p.a_lattice - semi_lattice_len_z;
-        fprintf(cond_in,"%s %lf %lf %lf\n", AtomName, r.x, r.y, r.z);
-
-        r.x = 0.5 * p.a_lattice + i * p.a_lattice - semi_lattice_len_x;  r.y = j * p.a_lattice - semi_lattice_len_y;   r.z = 0.5 * p.a_lattice + k *p.a_lattice - semi_lattice_len_z;
-        fprintf(cond_in,"%s %lf %lf %lf\n", AtomName, r.x, r.y, r.z);
-
-        r.x = 0.5 * p.a_lattice + i*p.a_lattice - semi_lattice_len_x;  r.y = 0.5 * p.a_lattice + j * p.a_lattice - semi_lattice_len_y;   r.z = k * p.a_lattice - semi_lattice_len_z;
-        fprintf(cond_in,"%s %lf %lf %lf\n", AtomName, r.x, r.y, r.z);
+        r[n].x = 0.5 * p.a_lattice + i*p.a_lattice - semi_lattice_len_x;
+        r[n].y = 0.5 * p.a_lattice + j * p.a_lattice - semi_lattice_len_y;
+        r[n].z = k * p.a_lattice - semi_lattice_len_z;
+        n++;
       }
-
-     }
-
+    }
   }
 
   if (p.reproducible) {
@@ -69,36 +57,17 @@ void set_initial_conditions(params p) {
   } else {
     srand(time(NULL));
     }
-  for (int i = 0; i < p.npart / 2; i++) { // p.npart / 2 perchè per annullare il momento e il momento angolare totale metto le velocità opposte a coppie
-    v0.x = GaussianNoise(p.mu, p.var);
-    v0.y = GaussianNoise(p.mu, p.var);
-    v0.z = GaussianNoise(p.mu, p.var);
-    fprintf(cond_in_vel,"%g %g %g\n", v0.x, v0.y, v0.z); // giochetto velocità opposte a coppie
-    fprintf(cond_in_vel,"%g %g %g\n",-v0.x,-v0.y,-v0.z);
+  n = 0;
+  for (int i = 0; i < p.npart; i++) { // p.npart / 2 perchè per annullare il momento e il momento angolare totale metto le velocità opposte a coppie
+    v[n].x = GaussianNoise(p.mu, p.var);
+    v[n].y = GaussianNoise(p.mu, p.var);
+    v[n].z = GaussianNoise(p.mu, p.var);
+    n++;
+    v[n].x = -v[n-1].x; // giochetto velocità opposte a coppie
+    v[n].y = -v[n-1].y;
+    v[n].z = -v[n-1].z;
+    n++;
   }
-  fclose(cond_in);
-  fclose(cond_in_vel);
-}
-
-
-void load_v(vec *r, params p) {
-  FILE *inputr = fopen(p.restartvelfilepath,"r");
-  for (int i = 0; i < p.npart; i++) {
-    fscanf(inputr,"%g %g %g\n", &(r[i].x), &(r[i].y), &(r[i].z));
-  }
-  fclose(inputr);
-}
-
-
-void load_r(vec *r, params p) {
-  FILE *inputr = fopen(p.restartcoordfilepath,"r");
-  char garb[STRLEN];
-  fscanf(inputr,"%s\n\n",garb);
-  for (int i = 0; i < p.npart; i++) {
-    fscanf(inputr,"atomX %g %g %g\n", &(r[i].x), &(r[i].y), &(r[i].z));
-        //printf("%g %g %g",r[i].x,r[i].y,r[i].z);
-  }
-  fclose(inputr);
 }
 
 

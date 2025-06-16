@@ -58,7 +58,7 @@ struct paramsMD {
 typedef struct paramsMD params;
 
 float GaussianNoise(float mu, float var);
-void set_initial_conditions(params p);
+void set_initial_conditions(vec *r, vec *v, params p);
 void load_r(vec *r, params p);
 void load_v(vec *v, params p);
 void load_r_2(FILE *inputhere, vec *r, params p);
@@ -69,11 +69,11 @@ void write_vi(FILE *output_file, vec vi);
 float potenergy(float r, float eps, float sigma);
 float simforce(float r, float eps, float sigma);
 void verlet_periodic(vec *r, vec *ro, vec *a, params p);
-void compute_kenergy_momentum(float t, vec *r, vec *ro, vec *a, float penergy, params p);
+void compute_kenergy_momentum(float t, vec *r, vec *ro, vec *v, float penergy, params p);
 void compute_kenergy_momentum2(float t, vec *r, vec *v, float penergy, params p);
 void compute_forces(vec *r, vec *a, params p);
 float compute_forces_stat(vec *r, vec *a, params p);
 void eulero(vec *r, vec *ro, vec *v, vec *a, params p);
-void writePointCloudToVTK(const char *filename, const vec *points, int numPoints);
+void writePointCloudToVTK(const char *filename, const vec *points, const vec *velocity, int numPoints);
 void writePointCloudToVTKBinary(const char *filename, const vec *points, int numPoints);
 

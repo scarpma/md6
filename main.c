@@ -36,6 +36,7 @@ int main(int argc, char *argv[]) {
   CHECK_FILE(p.restartcoordfile, p.restartcoordfilepath);
   CHECK_FILE(p.restartvelfile,   p.restartvelfilepath);
   char vtkfilename[STRLEN];
+  fprintf(p.statfile,"# t(0)   sumvx(1)   sumvy(2)   sumvz(3)    kenergy(4)   penergy(5)   energy(6)   red_temp(7)\n");
 
   // READ PARAMETERS
   fscanf(p.paramfile,"npartx=%i\nnparty=%i\nnlayers=%i\nnpart=%i\nwrite_jump=%i\ntimesteps=%i\ndt=%g\neps=%g\nsigma=%g\nmu=%g\nvar=%g\nm=%g\na_lattice=%g\npot_trunc_perc=%g\nnew_in_cond=%i\nreproducible=%i",&p.npartx,&p.nparty,&p.nlayers,&p.npart,&p.write_jump,&p.timesteps,&p.dt,&p.eps,&p.sigma,&p.mu,&p.var,&p.m,&p.a_lattice,&p.pot_trunc_perc,&p.newc,&p.reproducible);
@@ -62,25 +63,28 @@ int main(int argc, char *argv[]) {
   fprintf(p.logfile,"reproducible=%i\n",p.reproducible);
   fprintf(p.logfile,"Initialize FCC lattice and random velocities\n\n");
   fprintf(p.logfile, "r_max=%g    BOXL=%g    red. dens=%g\n",p.r_max,p.BOXL,p.reduced_density);
-  set_initial_conditions(p);
-    
-    
-  // OPEN OUTPUT FILES AND WRITE HEADERS
-  fprintf(p.statfile,"# t(0)   sumvx(1)   sumvy(2)   sumvz(3)    kenergy(4)   penergy(5)   energy(6)   red_temp(7)\n");
     
   // DECLARE VARIABLES
-  vec r[p.npart], ro[p.npart], a[p.npart], v[p.npart];
+  vec r[p.npart], ro[p.npart], v[p.npart], a[p.npart];
+  for (int i=0; i<p.npart; i++) {
+    r[i].x  = 0.;
+    r[i].y  = 0.;
+    r[i].z  = 0.;
+    ro[i].x = 0.;
+    ro[i].y = 0.;
+    ro[i].z = 0.;
+    v[i].x  = 0.;
+    v[i].y  = 0.;
+    v[i].z  = 0.;
+    a[i].x  = 0.;
+    a[i].y  = 0.;
+    a[i].z  = 0.;
+  }
+  set_initial_conditions(r, v, p);
+    
   
-  // LOAD INITIAL CONDITIONS
-  load_r(r, p);
-  load_v(v, p);
   printf("Integration started:\n\n");
   fprintf(p.logfile, "Integration started: wait!\n\n");
-  for (int i = 0; i < p.npart; i++) {
-      a[i].x = 0.0;
-      a[i].y = 0.0;
-      a[i].z = 0.0;
-  }
 
   printf("Ciao dal corso");
   printf("from the past");
@@ -103,7 +107,7 @@ int main(int argc, char *argv[]) {
       start = clock();
       snprintf(vtkfilename, STRLEN, "%s/particles_%08d.vtk", argv[1], t);
       //writePointCloudToVTKBinary(vtkfilename, r, npart); // does not work
-      writePointCloudToVTK(vtkfilename, r, p.npart);
+      writePointCloudToVTK(vtkfilename, r, v, p.npart);
     }
 
 
@@ -125,7 +129,7 @@ int main(int argc, char *argv[]) {
       if (t==0) {
         compute_kenergy_momentum2(t, r, v, penergy, p);
       } else {
-        compute_kenergy_momentum(t, r, ro, a, penergy, p);
+        compute_kenergy_momentum(t, r, ro, v, penergy, p);
       }
     }
 
