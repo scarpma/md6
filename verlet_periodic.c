@@ -81,11 +81,13 @@ void compute_kenergy_momentum2(float t, vec *r, vec *v, float penergy, params p)
 void compute_forces(vec *r, vec *a, params p) {
   vec rij;
   float rij2, simforceij;
+  //#pragma omp parallel for
   for (int i = 0; i < p.npart; i++) {
     a[i].x = 0.;
     a[i].y = 0.;
     a[i].z = 0.;
     }
+  #pragma omp parallel for private(rij, rij2, simforceij) schedule(static)
   for (int i = 0; i < p.npart; i++) {
     for (int j = i + 1; j < p.npart; j++) {
       rij.x = (r[i].x - r[j].x);
@@ -101,11 +103,17 @@ void compute_forces(vec *r, vec *a, params p) {
       if (rij2 < p.r_max_squared) {
         simforceij = simforce(rij2, p.eps, p.sigma);
         // printf("SIMFORCE %g\n",simforceij);
+        #pragma omp atomic
         a[i].x = a[i].x + simforceij * rij.x;
+        #pragma omp atomic
         a[i].y = a[i].y + simforceij * rij.y;
+        #pragma omp atomic
         a[i].z = a[i].z + simforceij * rij.z;
+        #pragma omp atomic
         a[j].x = a[j].x - simforceij * rij.x;
+        #pragma omp atomic
         a[j].y = a[j].y - simforceij * rij.y;
+        #pragma omp atomic
         a[j].z = a[j].z - simforceij * rij.z;
       }
     }

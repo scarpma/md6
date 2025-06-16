@@ -3,6 +3,7 @@
 #include <math.h>
 #include "defs.h"
 #include <time.h>
+#include <omp.h>
 
 #define CHECK_FILE(ptr, name) \
   if (!(ptr)) { perror("fopen " #name); exit(1); }
@@ -11,6 +12,7 @@ int main(int argc, char *argv[]) {
   params p;
   int t;
   float penergy;
+  printf("Running with %d threads\n", omp_get_num_threads());
   printf("Ciao dal corso, (non) sono Filippo. Chi sono?\n");
   printf("Hola senor Martino 💃💃💃💃💃💃💃!\n");
   // CHECK IF COMMAND LINE ARGUMENTS ARE PROVIDED

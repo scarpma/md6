@@ -2,7 +2,9 @@ all: ./exec/main# ./exec/autodiffusion ./exec/corr_func
 
 OBJS = ./exec/verlet_periodic.o ./exec/in_cond.o ./exec/write_to_vtk.o
 
-CC = cc -O0 -ggdb -fmax-errors=3
+#CC = cc -O3 -ggdb
+CC = cc -O3 -ggdb -Xclang -fopenmp -L/opt/homebrew/opt/libomp/lib -I/opt/homebrew/opt/libomp/include -lomp
+#CC = /opt/homebrew/bin/gcc-15 -O3 -ggdb -fopenmp
 
 ./exec/main: ./exec/main.o $(OBJS)
 	$(CC) -o $@ ./exec/main.o $(OBJS) -lm
