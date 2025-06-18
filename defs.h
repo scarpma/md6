@@ -12,6 +12,7 @@ typedef struct vec3d vec;
 
 struct paramsMD {
   // read params
+  int twodim;
   int npartx;
   int nparty;
   int nlayers;
