@@ -114,10 +114,11 @@ void compute_forces(vec *r, vec *a, params p) {
 }
 
 
-REAL compute_forces_stat(vec *r, vec *a, params p) {
+REAL compute_forces_stat(int t, vec *r, vec *a, params p) {
   vec rij;
   REAL rij2, simforceij;
   REAL penergy = 0.;
+  int idx = 0;
   for (int i = 0; i < p.npart; i++) {
     a[i].x = 0.;
     a[i].y = 0.;
@@ -132,6 +133,12 @@ REAL compute_forces_stat(vec *r, vec *a, params p) {
       rij.y = rij.y - p.BOXL*round(rij.y/p.BOXL);
       rij.z = rij.z - p.BOXL*round(rij.z/p.BOXL);
       rij2 = rij.x*rij.x + rij.y*rij.y + rij.z*rij.z;
+      if (t > 5000) {
+        idx = (int) floor((rij2 - p.hist_min) / p.hist_binw);
+        idx = MAX(0, idx);
+        idx = MIN(p.hist_binc-1, idx);
+        p.hist[idx] = p.hist[idx] + 1.0;
+      }
       if (rij2 < p.r_max_squared) {
         simforceij = simforce(rij2, p.eps, p.sigma);
         penergy = penergy + (potenergy(rij2, p.eps, p.sigma) - p.shift);

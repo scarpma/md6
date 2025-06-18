@@ -3,6 +3,7 @@ all: ./exec/main# ./exec/autodiffusion ./exec/corr_func
 OBJS = ./exec/verlet_periodic.o ./exec/in_cond.o ./exec/write_to_vtk.o
 
 CC = cc -O3 -ggdb -Wall -Wextra
+#CC = cc -Xpreprocessor -fopenmp -lomp -O3 -ggdb -Wall -Wextra -I/opt/homebrew/opt/libomp/include/ -L/opt/homebrew/opt/libomp/lib/
 
 ./exec/main: ./exec/main.o $(OBJS)
 	$(CC) -o $@ ./exec/main.o $(OBJS) -lm

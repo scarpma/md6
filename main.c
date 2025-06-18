@@ -11,8 +11,7 @@ int main(int argc, char *argv[]) {
   params p;
   int t;
   REAL penergy;
-  printf("Ciao dal corso, (non) sono Filippo. Chi sono?\n");
-  printf("Hola senor Martino 💃💃💃💃💃💃💃!\n");
+
   // CHECK IF COMMAND LINE ARGUMENTS ARE PROVIDED
   if (argc < 2) {fprintf(stderr, "Usage: %s <input_file_path>\n", argv[0]); return -1;}
   // WRITE INPUT AND OUTPUT PATHS
@@ -23,18 +22,21 @@ int main(int argc, char *argv[]) {
   snprintf(p.restartcoordfilepath, STRLEN, "%s/in_cond.xyz",         argv[1]);
   snprintf(p.restartvelfilepath,   STRLEN, "%s/in_cond_vel.dat",     argv[1]);
   snprintf(p.restartvelfilepath,   STRLEN, "%s/in_cond_vel.dat",     argv[1]);
-  p.paramfile        = fopen(p.paramfilepath, "r");
-  p.logfile          = fopen(p.logfilepath, "w");
-  p.statfile         = fopen(p.statfilepath, "w");
-  p.coordfile        = fopen(p.coordfilepath, "w");
+  snprintf(p.histfilepath,         STRLEN, "%s/hist.dat",            argv[1]);
+  p.paramfile        = fopen(p.paramfilepath,        "r");
+  p.logfile          = fopen(p.logfilepath,          "w");
+  p.statfile         = fopen(p.statfilepath,         "w");
+  p.coordfile        = fopen(p.coordfilepath,        "w");
   p.restartcoordfile = fopen(p.restartcoordfilepath, "w");
-  p.restartvelfile   = fopen(p.restartvelfilepath, "w");
+  p.restartvelfile   = fopen(p.restartvelfilepath,   "w");
+  p.histfile         = fopen(p.histfilepath,         "w");
   CHECK_FILE(p.paramfile,        p.paramfilepath);
   CHECK_FILE(p.logfile,          p.logfilepath);
   CHECK_FILE(p.statfile,         p.statfilepath);
   CHECK_FILE(p.coordfile,        p.coordfilepath);
   CHECK_FILE(p.restartcoordfile, p.restartcoordfilepath);
   CHECK_FILE(p.restartvelfile,   p.restartvelfilepath);
+  CHECK_FILE(p.histfile,   p.histfilepath);
   char vtkfilename[STRLEN];
   fprintf(p.statfile,"# t(0)   sumvx(1)   sumvy(2)   sumvz(3)    kenergy(4)   penergy(5)   energy(6)   red_temp(7)\n");
 
@@ -53,6 +55,14 @@ int main(int argc, char *argv[]) {
     p.BOXL = p.npartx * p.a_lattice;
   }
   p.reduced_density = p.npart * p.sigma / pow(p.BOXL, 3.);
+  p.hist_min  = 0.;
+  p.hist_max  = (p.BOXL / 2.) * (p.BOXL / 2.);
+  p.hist_binc = 500;
+  p.hist_binw = ( p.hist_max - p.hist_min ) / p.hist_binc;
+  p.hist = (REAL *)malloc(sizeof(REAL) * p.hist_binc);
+  for (int kt = 0; kt<p.hist_binc; kt++) {
+    p.hist[kt] = 0.;
+  }
 
   if (p.newc==0) {printf("Restart simulation feature not available. Stoppingi\n"); return -1;}
   write_params(p);
@@ -78,9 +88,6 @@ int main(int argc, char *argv[]) {
   
   printf("Integration started:\n\n");
   fprintf(p.logfile, "Integration started: wait!\n\n");
-
-  printf("Ciao dal corso");
-  printf("from the past");
 
   // CHECK PARTICLES INSIDE BOX
   int out_count = 0;
@@ -109,7 +116,7 @@ int main(int argc, char *argv[]) {
     // POTENTIAL ENERGY AND FORCES //
     // =========================== //
     if (t%p.write_jump==0) {
-      penergy = compute_forces_stat(r, a, p);
+      penergy = compute_forces_stat(t, r, a, p);
     } else {
       compute_forces(r, a, p);
     }
@@ -149,6 +156,31 @@ int main(int argc, char *argv[]) {
 
     t++;
   }
+
+
+  REAL *rdf, *rrdf;
+  rdf = (REAL *)malloc(sizeof(REAL) * p.hist_binc);
+  rrdf = (REAL *)malloc(sizeof(REAL) * p.hist_binc);
+  for (int kt = 0; kt<p.hist_binc; kt++) {
+    rdf[kt] = 0.;
+    rrdf[kt] = 0.;
+  }
+  REAL r_hist  = 0.;
+  REAL dr_hist = 0.;
+  REAL norm = 0.;
+  for (int kt = 1; kt<p.hist_binc-1; kt++) {
+    r_hist  = sqrt(p.hist_min + ( kt + 0.5 )*p.hist_binw);
+    dr_hist = sqrt(p.hist_min + ( kt + 1   )*p.hist_binw)
+       - sqrt(p.hist_min + ( kt       )*p.hist_binw);
+    if (twodim==0) {
+      norm = 4.0*3.14*r_hist*r_hist*dr_hist; // 3D
+    } else {
+      norm = 2.0*3.14*r_hist*dr_hist;        // 2D
+    }
+    rrdf[kt] = r_hist;
+    rdf[kt] = p.hist[kt] / (norm * p.timesteps / p.write_jump);
+    fprintf(p.histfile, "%lf %lf\n", rrdf[kt], rdf[kt]);
+  }
   
   // CLOSE FILES
   fclose(p.coordfile);
@@ -158,6 +190,7 @@ int main(int argc, char *argv[]) {
   printf("Done!\n\n");
   fprintf(p.logfile, "Done!\n\n\n\n\n\n\n\n");
   fclose(p.logfile);
+  fclose(p.histfile);
 }
 
 /*

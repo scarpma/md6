@@ -39,6 +39,8 @@ struct paramsMD {
   REAL reduced_density, red_temp;
   // handy variables used often
   REAL dtsquare, dtdouble, r_max_squared;
+  REAL hist_min, hist_max, hist_binc, hist_binw;
+  REAL *hist;
   
   // path of files
   char paramfilepath[STRLEN];
@@ -47,6 +49,7 @@ struct paramsMD {
   char coordfilepath[STRLEN];
   char restartcoordfilepath[STRLEN];
   char restartvelfilepath[STRLEN];
+  char histfilepath[STRLEN];
   char autodiffusionfilepath[STRLEN];
   char corrfuncfilepath[STRLEN];
   
@@ -57,6 +60,7 @@ struct paramsMD {
   FILE *coordfile;
   FILE *restartcoordfile;
   FILE *restartvelfile;
+  FILE *histfile;
   FILE *autodiffusionfile;
   FILE *corrfuncfile;
 };
@@ -79,9 +83,12 @@ void verlet_periodic(vec *r, vec *ro, vec *a, params p);
 void compute_kenergy_momentum(REAL t, vec *r, vec *ro, vec *v, REAL penergy, params p);
 void compute_kenergy_momentum2(REAL t, vec *r, vec *v, REAL penergy, params p);
 void compute_forces(vec *r, vec *a, params p);
-REAL compute_forces_stat(vec *r, vec *a, params p);
+REAL compute_forces_stat(int t, vec *r, vec *a, params p);
 void eulero(vec *r, vec *ro, vec *v, vec *a, params p);
 void writePointCloudToVTK(const char *filename, const vec *points, const vec *velocity, int numPoints);
 void writePointCloudToVTKBinary(const char *filename, const vec *points, int numPoints);
 void writePointCloudToVTKBinaryBigEndian(const char *filename, const vec *points, const vec *velocity, int numPoints);
 
+
+#define MAX(a, b) ((a) > (b) ? (a) : (b))
+#define MIN(a, b) ((a) < (b) ? (a) : (b))
