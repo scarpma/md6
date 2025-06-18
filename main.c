@@ -99,8 +99,9 @@ int main(int argc, char *argv[]) {
     if (t%p.write_jump==0) {
       start = clock();
       snprintf(vtkfilename, STRLEN, "%s/particles_%08d.vtk", argv[1], t);
-      //writePointCloudToVTKBinary(vtkfilename, r, npart); // does not work
-      writePointCloudToVTK(vtkfilename, r, v, p.npart);
+      //writePointCloudToVTKBinary(vtkfilename, r, p.npart); // does not work
+      writePointCloudToVTKBinaryBigEndian(vtkfilename, r, v, p.npart);
+      //writePointCloudToVTK(vtkfilename, r, v, p.npart);
     }
 
 

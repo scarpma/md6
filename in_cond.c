@@ -170,7 +170,7 @@ void write_stat(REAL t, vec sumv, REAL kenergy, REAL penergy, params p) {
   kenergy = kenergy * 0.5 * p.m;
   REAL reduced_temperature = 2. * kenergy / ((p.npart - 3.) * p.eps);
   fprintf(p.statfile,"%lg %lg %lg %lg %lg %lg %lg %lg\n", t*p.dt, sumv.x, sumv.y, sumv.z, kenergy, penergy, kenergy + penergy, reduced_temperature);
-  printf("tot mom: %lg %lg %lg\nenergy: %lg %lg %lg\n", sumv.x, sumv.y, sumv.z, kenergy, penergy, kenergy + penergy);
+  printf("  tot mom: %lg %lg %lg\n  energy: %lg %lg %lg\n", sumv.x, sumv.y, sumv.z, kenergy, penergy, kenergy + penergy);
 }
 
 

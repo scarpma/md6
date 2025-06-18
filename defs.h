@@ -83,4 +83,5 @@ REAL compute_forces_stat(vec *r, vec *a, params p);
 void eulero(vec *r, vec *ro, vec *v, vec *a, params p);
 void writePointCloudToVTK(const char *filename, const vec *points, const vec *velocity, int numPoints);
 void writePointCloudToVTKBinary(const char *filename, const vec *points, int numPoints);
+void writePointCloudToVTKBinaryBigEndian(const char *filename, const vec *points, const vec *velocity, int numPoints);
 
