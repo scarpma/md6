@@ -21,7 +21,7 @@ void writePointCloudToVTK(const char *filename, const vec *points, const vec *ve
     // --- Points Section ---
     fprintf(fp, "POINTS %d float\n", numPoints); // Number of points and data type
     for (int i = 0; i < numPoints; i++) {
-        fprintf(fp, "%f %f %f\n", points[i].x, points[i].y, points[i].z);
+        fprintf(fp, "%.4e %.4e %.4e\n", points[i].x, points[i].y, points[i].z);
     }
 
     // // --- Vertices Section (to make each point a distinct vertex) ---
@@ -42,7 +42,7 @@ void writePointCloudToVTK(const char *filename, const vec *points, const vec *ve
 
     // Write the velocity data for each point (3 floats for each velocity)
     for (int i = 0; i < numPoints; i++) {
-      fprintf(fp, "%f %f %f\n", velocity[i].x, velocity[i].y, velocity[i].z);
+      fprintf(fp, "%.4e %.4e %.4e\n", velocity[i].x, velocity[i].y, velocity[i].z);
     }
 
 

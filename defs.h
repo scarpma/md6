@@ -6,8 +6,12 @@
 // useful for debbugging
 #define LOG_LOCATION() printf("File: %s, Line: %d\n", __FILE__, __LINE__)
 #define STRLEN 256
+#define REAL double 
 
-struct vec3d {float x, y, z;};
+//FLOAT IS NOT SUPPORTED ANYMORE
+//#define REAL float
+
+struct vec3d {REAL x, y, z;};
 typedef struct vec3d vec;
 
 struct paramsMD {
@@ -19,22 +23,22 @@ struct paramsMD {
   int npart;
   int write_jump;
   int timesteps;
-  float dt;
-  float eps;
-  float sigma;
-  float mu;
-  float var;
-  float m;
-  float a_lattice;
-  float pot_trunc_perc;
+  REAL dt;
+  REAL eps;
+  REAL sigma;
+  REAL mu;
+  REAL var;
+  REAL m;
+  REAL a_lattice;
+  REAL pot_trunc_perc;
   int newc;
   int reproducible;
 
   // computed params
-  float r_max, BOXL, shift;
-  float reduced_density, red_temp;
+  REAL r_max, BOXL, shift;
+  REAL reduced_density, red_temp;
   // handy variables used often
-  float dtsquare, dtdouble, r_max_squared;
+  REAL dtsquare, dtdouble, r_max_squared;
   
   // path of files
   char paramfilepath[STRLEN];
@@ -58,22 +62,24 @@ struct paramsMD {
 };
 typedef struct paramsMD params;
 
-float GaussianNoise(float mu, float var);
+void write_params(params p);
+
+REAL GaussianNoise(REAL mu, REAL var);
 void set_initial_conditions(vec *r, vec *v, params p);
 void load_r(vec *r, params p);
 void load_v(vec *v, params p);
 void load_r_2(FILE *inputhere, vec *r, params p);
-void write_stat(float t, vec sumv, float kenergy, float penergy, params p);
+void write_stat(REAL t, vec sumv, REAL kenergy, REAL penergy, params p);
 void write_r(FILE *output_file, vec *r, params p);
 void write_vi(FILE *output_file, vec vi);
 
-float potenergy(float r, float eps, float sigma);
-float simforce(float r, float eps, float sigma);
+REAL potenergy(REAL r, REAL eps, REAL sigma);
+REAL simforce(REAL r, REAL eps, REAL sigma);
 void verlet_periodic(vec *r, vec *ro, vec *a, params p);
-void compute_kenergy_momentum(float t, vec *r, vec *ro, vec *v, float penergy, params p);
-void compute_kenergy_momentum2(float t, vec *r, vec *v, float penergy, params p);
+void compute_kenergy_momentum(REAL t, vec *r, vec *ro, vec *v, REAL penergy, params p);
+void compute_kenergy_momentum2(REAL t, vec *r, vec *v, REAL penergy, params p);
 void compute_forces(vec *r, vec *a, params p);
-float compute_forces_stat(vec *r, vec *a, params p);
+REAL compute_forces_stat(vec *r, vec *a, params p);
 void eulero(vec *r, vec *ro, vec *v, vec *a, params p);
 void writePointCloudToVTK(const char *filename, const vec *points, const vec *velocity, int numPoints);
 void writePointCloudToVTKBinary(const char *filename, const vec *points, int numPoints);

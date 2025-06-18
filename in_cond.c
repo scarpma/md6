@@ -4,16 +4,66 @@
 #include <math.h>
 #include <time.h>
 
-float GaussianNoise(float mu, float var){
+REAL GaussianNoise(REAL mu, REAL var){
   double u1, u2;
   u1 = rand() * (1.0 / RAND_MAX);
   u2 = rand() * (1.0 / RAND_MAX);
-  double z0, z1;
+  double z0;
+  //double z0, z1;
   z0 = sqrt(-2.0 * log(u1)) * cos(2 * M_PI * u2);
-  z1 = sqrt(-2.0 * log(u1)) * sin(2 * M_PI * u2);
+  //z1 = sqrt(-2.0 * log(u1)) * sin(2 * M_PI * u2);
   return z0 * var + mu;
 }
 
+void write_params(params p) {
+  printf("twodim:         %d\n",p.twodim);
+  printf("npartx:         %d\n",p.npartx);
+  printf("nparty:         %d\n",p.nparty);
+  printf("nlayers:        %d\n",p.nlayers);
+  printf("npart:          %d\n",p.npart);
+  printf("write_jump:     %d\n",p.write_jump);
+  printf("timesteps:      %d\n",p.timesteps);
+  printf("dt:             %lf\n",p.dt);
+  printf("eps:            %lf\n",p.eps);
+  printf("sigma:          %lf\n",p.sigma);
+  printf("mu:             %lf\n",p.mu);
+  printf("var:            %lf\n",p.var);
+  printf("m:              %lf\n",p.m);
+  printf("a_lattice:      %lf\n",p.a_lattice);
+  printf("pot_trunc_perc: %lf\n",p.pot_trunc_perc);
+  printf("newc:           %d\n",p.newc);
+  printf("reproducible:   %d\n",p.reproducible);
+  printf("r_max :         %lf\n",p.r_max);
+  printf("BOXL:           %lf\n",p.BOXL);
+  printf("shift:          %lf\n",p.shift);
+  printf("dtsquare:       %lf\n",p.dtsquare);
+  printf("dtdouble:       %lf\n",p.dtdouble);
+  printf("r_max_squared:  %lf\n",p.r_max_squared);
+
+  fprintf(p.logfile, "twodim:         %d\n",p.twodim);
+  fprintf(p.logfile, "npartx:         %d\n",p.npartx);
+  fprintf(p.logfile, "nparty:         %d\n",p.nparty);
+  fprintf(p.logfile, "nlayers:        %d\n",p.nlayers);
+  fprintf(p.logfile, "npart:          %d\n",p.npart);
+  fprintf(p.logfile, "write_jump:     %d\n",p.write_jump);
+  fprintf(p.logfile, "timesteps:      %d\n",p.timesteps);
+  fprintf(p.logfile, "dt:             %lf\n",p.dt);
+  fprintf(p.logfile, "eps:            %lf\n",p.eps);
+  fprintf(p.logfile, "sigma:          %lf\n",p.sigma);
+  fprintf(p.logfile, "mu:             %lf\n",p.mu);
+  fprintf(p.logfile, "var:            %lf\n",p.var);
+  fprintf(p.logfile, "m:              %lf\n",p.m);
+  fprintf(p.logfile, "a_lattice:      %lf\n",p.a_lattice);
+  fprintf(p.logfile, "pot_trunc_perc: %lf\n",p.pot_trunc_perc);
+  fprintf(p.logfile, "newc:           %d\n",p.newc);
+  fprintf(p.logfile, "reproducible:   %d\n",p.reproducible);
+  fprintf(p.logfile, "r_max :         %lf\n",p.r_max);
+  fprintf(p.logfile, "BOXL:           %lf\n",p.BOXL);
+  fprintf(p.logfile, "shift:          %lf\n",p.shift);
+  fprintf(p.logfile, "dtsquare:       %lf\n",p.dtsquare);
+  fprintf(p.logfile, "dtdouble:       %lf\n",p.dtdouble);
+  fprintf(p.logfile, "r_max_squared:  %lf\n",p.r_max_squared);
+}
 
 void set_initial_conditions(vec *r, vec *v, params p) {
   if (p.twodim==0) {
@@ -27,9 +77,9 @@ void set_initial_conditions(vec *r, vec *v, params p) {
       fprintf(p.logfile,"** PROBLEMA **\np.npart non congruente!\n");
     }
   }
-  float semi_lattice_len_x =  p.npartx*p.a_lattice/2.; // (0.5 + max(p.npartx-1,p.nparty-1,p.nlayers-1) * p.a_lattice è la lunghezza  del reticolo nella direzione che la rende massima)
-  float semi_lattice_len_y =  p.nparty*p.a_lattice/2.;
-  float semi_lattice_len_z = p.nlayers*p.a_lattice/2.;
+  REAL semi_lattice_len_x =  p.npartx*p.a_lattice/2.; // (0.5 + max(p.npartx-1,p.nparty-1,p.nlayers-1) * p.a_lattice è la lunghezza  del reticolo nella direzione che la rende massima)
+  REAL semi_lattice_len_y =  p.nparty*p.a_lattice/2.;
+  REAL semi_lattice_len_z = p.nlayers*p.a_lattice/2.;
   
   int n = 0;
   if (p.twodim==0) {
@@ -94,16 +144,16 @@ void set_initial_conditions(vec *r, vec *v, params p) {
     if (p.twodim==1) {v[n].z = 0.;}
     n++;
   }
-  //
-  //// shuffle the array using Fisher-Yates algorithm
-  //for (int i = p.npart-1; i > 0; --i) {
-  //  // Generate a random index j such that 0 <= j <= i
-  //  int j = rand()%(i + 1);
-  //  // Swap arr[i] with arr[j]
-  //  vec tmp = v[i];
-  //  v[i] = v[j];
-  //  v[j] = tmp;
-  //}
+  
+  // shuffle the array using Fisher-Yates algorithm
+  for (int i = p.npart-1; i > 0; --i) {
+    // Generate a random index j such that 0 <= j <= i
+    int j = rand()%(i + 1);
+    // Swap arr[i] with arr[j]
+    vec tmp = v[i];
+    v[i] = v[j];
+    v[j] = tmp;
+  }
 }
 
 
@@ -111,16 +161,16 @@ void load_r_2(FILE *inputhere, vec *r, params p) {
   char garb[STRLEN];
   fscanf(inputhere,"%s\n\n",garb);
   for (int i = 0; i < p.npart; i++) {
-    fscanf(inputhere,"atomX %g %g %g\n", &(r[i].x), &(r[i].y), &(r[i].z));
+    fscanf(inputhere,"atomX %lg %lg %lg\n", &(r[i].x), &(r[i].y), &(r[i].z));
   }
 }
 
 
-void write_stat(float t, vec sumv, float kenergy, float penergy, params p) {
+void write_stat(REAL t, vec sumv, REAL kenergy, REAL penergy, params p) {
   kenergy = kenergy * 0.5 * p.m;
-  float reduced_temperature = 2. * kenergy / ((p.npart - 3.) * p.eps);
-  fprintf(p.statfile,"%g %g %g %g %g %g %g %g\n", t*p.dt, sumv.x, sumv.y, sumv.z, kenergy, penergy, kenergy + penergy, reduced_temperature);
-  printf("tot mom: %g %g %g\nenergy: %g %g %g\n", sumv.x, sumv.y, sumv.z, kenergy, penergy, kenergy + penergy);
+  REAL reduced_temperature = 2. * kenergy / ((p.npart - 3.) * p.eps);
+  fprintf(p.statfile,"%lg %lg %lg %lg %lg %lg %lg %lg\n", t*p.dt, sumv.x, sumv.y, sumv.z, kenergy, penergy, kenergy + penergy, reduced_temperature);
+  printf("tot mom: %lg %lg %lg\nenergy: %lg %lg %lg\n", sumv.x, sumv.y, sumv.z, kenergy, penergy, kenergy + penergy);
 }
 
 
@@ -129,11 +179,11 @@ void write_stat(float t, vec sumv, float kenergy, float penergy, params p) {
 void write_r(FILE *output_file, vec *r, params p) {
   fprintf(output_file, "%i\n\n", p.npart);
   for (int i = 0; i < p.npart; i++) {
-    fprintf(output_file, "atomX %g %g %g\n", r[i].x, r[i].y, r[i].z);
+    fprintf(output_file, "atomX %lg %lg %lg\n", r[i].x, r[i].y, r[i].z);
   }
 }
 
 
 void write_vi(FILE *output_file, vec vi) {
-  fprintf(output_file, "%g %g %g\n", vi.x, vi.y, vi.z);
+  fprintf(output_file, "%lg %lg %lg\n", vi.x, vi.y, vi.z);
 }

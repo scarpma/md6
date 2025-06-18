@@ -10,7 +10,7 @@
 int main(int argc, char *argv[]) {
   params p;
   int t;
-  float penergy;
+  REAL penergy;
   printf("Ciao dal corso, (non) sono Filippo. Chi sono?\n");
   printf("Hola senor Martino 💃💃💃💃💃💃💃!\n");
   // CHECK IF COMMAND LINE ARGUMENTS ARE PROVIDED
@@ -39,7 +39,7 @@ int main(int argc, char *argv[]) {
   fprintf(p.statfile,"# t(0)   sumvx(1)   sumvy(2)   sumvz(3)    kenergy(4)   penergy(5)   energy(6)   red_temp(7)\n");
 
   // READ PARAMETERS
-  fscanf(p.paramfile,"twodim=%i\nnpartx=%i\nnparty=%i\nnlayers=%i\nnpart=%i\nwrite_jump=%i\ntimesteps=%i\ndt=%g\neps=%g\nsigma=%g\nmu=%g\nvar=%g\nm=%g\na_lattice=%g\npot_trunc_perc=%g\nnew_in_cond=%i\nreproducible=%i",&p.twodim,&p.npartx,&p.nparty,&p.nlayers,&p.npart,&p.write_jump,&p.timesteps,&p.dt,&p.eps,&p.sigma,&p.mu,&p.var,&p.m,&p.a_lattice,&p.pot_trunc_perc,&p.newc,&p.reproducible);
+  fscanf(p.paramfile,"twodim=%d\nnpartx=%d\nnparty=%d\nnlayers=%d\nnpart=%d\nwrite_jump=%d\ntimesteps=%d\ndt=%lg\neps=%lg\nsigma=%lg\nmu=%lg\nvar=%lg\nm=%lg\na_lattice=%lg\npot_trunc_perc=%lg\nnew_in_cond=%d\nreproducible=%d",&p.twodim,&p.npartx,&p.nparty,&p.nlayers,&p.npart,&p.write_jump,&p.timesteps,&p.dt,&p.eps,&p.sigma,&p.mu,&p.var,&p.m,&p.a_lattice,&p.pot_trunc_perc,&p.newc,&p.reproducible);
   fclose(p.paramfile);
   // INITIALIZE VARIABLES
   p.dtdouble = 2.*p.dt;
@@ -55,19 +55,7 @@ int main(int argc, char *argv[]) {
   p.reduced_density = p.npart * p.sigma / pow(p.BOXL, 3.);
 
   if (p.newc==0) {printf("Restart simulation feature not available. Stoppingi\n"); return -1;}
-  printf("r_max=%g    BOXL=%g    red. dens=%g\n",p.r_max,p.BOXL,p.reduced_density);
-  printf("Initialize FCC lattice and random velocities.\n");
-  fprintf(p.logfile,"start new simulation:\n\nPARAM:\n");
-  fprintf(p.logfile,"twodim=%i\n",p.twodim);
-  fprintf(p.logfile,"npartx=%i\nnparty=%i\n",p.npartx,p.nparty);
-  fprintf(p.logfile,"nlayers=%i\nnpart=%i\n",p.nlayers,p.npart);
-  fprintf(p.logfile,"write_jump=%i\ntimesteps=%i\n",p.write_jump,p.timesteps);
-  fprintf(p.logfile,"dt=%g\neps=%g\nsigma=%g\n",p.dt,p.eps,p.sigma);
-  fprintf(p.logfile,"mu=%g\nvar=%g\nm=%g\na_lattice=%g\n",p.mu,p.var,p.m,p.a_lattice);
-  fprintf(p.logfile,"pot_trunc_perc=%g\nnew_in_cond=%i\n\n\n",p.pot_trunc_perc,p.newc);
-  fprintf(p.logfile,"reproducible=%i\n",p.reproducible);
-  fprintf(p.logfile,"Initialize FCC lattice and random velocities\n\n");
-  fprintf(p.logfile, "r_max=%g    BOXL=%g    red. dens=%g\n",p.r_max,p.BOXL,p.reduced_density);
+  write_params(p);
     
   // DECLARE VARIABLES
   vec r[p.npart], ro[p.npart], v[p.npart], a[p.npart];

@@ -9,13 +9,13 @@
 // Per rendere tutto consistente il reticolo creato deve riempire il box e non andare oltre.
 
 
-float potenergy(float r, float eps, float sigma) {
+REAL potenergy(REAL r, REAL eps, REAL sigma) {
   return 4.0*eps*(pow(sigma/r,6.) - pow(sigma/r,3.));
   // return 0.0; // per test
 }
 
 
-float simforce(float r, float eps, float sigma) {
+REAL simforce(REAL r, REAL eps, REAL sigma) {
   return 24.0*eps*(2.*pow(sigma/r,7.) - pow(sigma/r,4.)); // c'è l'r^2 a dividere già dentro
   // return 0.0; // per test
 }
@@ -41,9 +41,9 @@ void verlet_periodic(vec *r, vec *ro, vec *a, params p) {
 }
 
 
-void compute_kenergy_momentum(float t, vec *r, vec *ro, vec *v, float penergy, params p) {
+void compute_kenergy_momentum(REAL t, vec *r, vec *ro, vec *v, REAL penergy, params p) {
   vec sumv;
-  float kenergy;
+  REAL kenergy;
   sumv.x = 0.;
   sumv.y = 0.;
   sumv.z = 0.;
@@ -61,9 +61,9 @@ void compute_kenergy_momentum(float t, vec *r, vec *ro, vec *v, float penergy, p
 }
 
 
-void compute_kenergy_momentum2(float t, vec *r, vec *v, float penergy, params p) {
+void compute_kenergy_momentum2(REAL t, vec *r, vec *v, REAL penergy, params p) {
   vec sumv;
-  float kenergy;
+  REAL kenergy;
   sumv.x = 0.;
   sumv.y = 0.;
   sumv.z = 0.;
@@ -80,7 +80,7 @@ void compute_kenergy_momentum2(float t, vec *r, vec *v, float penergy, params p)
 
 void compute_forces(vec *r, vec *a, params p) {
   vec rij;
-  float rij2, simforceij;
+  REAL rij2, simforceij;
   for (int i = 0; i < p.npart; i++) {
     a[i].x = 0.;
     a[i].y = 0.;
@@ -114,10 +114,10 @@ void compute_forces(vec *r, vec *a, params p) {
 }
 
 
-float compute_forces_stat(vec *r, vec *a, params p) {
+REAL compute_forces_stat(vec *r, vec *a, params p) {
   vec rij;
-  float rij2, simforceij;
-  float penergy = 0.;
+  REAL rij2, simforceij;
+  REAL penergy = 0.;
   for (int i = 0; i < p.npart; i++) {
     a[i].x = 0.;
     a[i].y = 0.;
